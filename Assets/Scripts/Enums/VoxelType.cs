@@ -2,13 +2,8 @@ using System;
 
 namespace Game.Services.MapGenerator
 {
-	public interface IMapGeneratorProvider
-	{
-		ETileType[] GenerateGround(int width, int height);
-	}
-	
 	[Flags]
-	public enum ETileType : byte
+	public enum VoxelType : byte
 	{
 		GroundWater = 1,
 		Water = 2,

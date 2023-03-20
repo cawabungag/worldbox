@@ -2,9 +2,9 @@ using System;
 
 namespace Game.Services.MapGenerator.Impls
 {
-	public class MapGeneratorProvider : IMapGeneratorProvider
+	public class MapGenerator : IMapGenerator
 	{
-		public ETileType[] GenerateGround(int width, int height)
+		public VoxelType[] GenerateGround(int width, int height)
 		{
 			var random = new Random();
 
@@ -15,7 +15,7 @@ namespace Game.Services.MapGenerator.Impls
 			var noise1 = new SampleGenerator(width, height, random, 32);
 			var noise2 = new SampleGenerator(width, height, random, 32);
 
-			var map = new ETileType[width * height];
+			var map = new VoxelType[width * height];
 			for (var y = 0; y < height; y++)
 			{
 				for (var x = 0; x < width; x++)
@@ -36,13 +36,13 @@ namespace Game.Services.MapGenerator.Impls
 					val = val + 1 - dist * 20;
 
 					if (val < LayerRatio.Ground.NOISE_WATER_LOWER)
-						map[i] = ETileType.Water;
+						map[i] = VoxelType.Water;
 					else if (val > LayerRatio.Ground.NOISE_ROCK_HIGHER && mval < LayerRatio.Ground.NOISE_ROCK_LOWER)
-						map[i] = ETileType.Rock;
+						map[i] = VoxelType.Rock;
 					else if (val < LayerRatio.Ground.NOISE_HILL_HIGHER)
-						map[i] = ETileType.Plain;
+						map[i] = VoxelType.Plain;
 					else
-						map[i] = ETileType.Forest;
+						map[i] = VoxelType.Forest;
 				}
 			}
 
@@ -61,8 +61,8 @@ namespace Game.Services.MapGenerator.Impls
 						for (var yy = yo - 1; yy <= yo + 1; yy++)
 						for (var xx = xo - 1; xx <= xo + 1; xx++)
 							if (xx >= 0 && yy >= 0 && xx < width && yy < height)
-								if (map[xx + yy * width] == ETileType.Plain)
-									map[xx + yy * width] = ETileType.Sand;
+								if (map[xx + yy * width] == VoxelType.Plain)
+									map[xx + yy * width] = VoxelType.Sand;
 					}
 				}
 			}
