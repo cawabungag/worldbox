@@ -9,10 +9,10 @@ namespace ECS.Systems
 	public class GenerateMapSystem : IEcsInitSystem
 	{
 		private const int WORLD_SIZE = 256;
-		private readonly IMapGenerator mapGenerator;
+		private readonly IMapGenerator _mapGenerator;
 
 		public GenerateMapSystem(IMapGenerator mapGenerator) 
-			=> this.mapGenerator = mapGenerator;
+			=> _mapGenerator = mapGenerator;
 
 		public void Init(IEcsSystems systems)
 		{
@@ -21,7 +21,7 @@ namespace ECS.Systems
 			var voxelPositionPool = world.GetPool<VoxelPositionComponent>();
 			var voxelTypePool = world.GetPool<VoxelTypeComponent>();
 			
-			var voxels = mapGenerator.GenerateGround(WORLD_SIZE, WORLD_SIZE);
+			var voxels = _mapGenerator.GenerateGround(WORLD_SIZE, WORLD_SIZE);
 			var halfWidth = WORLD_SIZE / 2;
 			var halfHeight = WORLD_SIZE / 2;
 
