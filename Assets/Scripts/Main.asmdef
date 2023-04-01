@@ -1,0 +1,7 @@
+{
+  "name": "Main",
+  "references": [
+    "Zenject",
+    "Leopotam.EcsLite"
+  ]
+}

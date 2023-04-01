@@ -16,6 +16,7 @@ namespace Installers
 		{
 			Container.BindInterfacesTo<EcsBootstrap>().AsSingle().NonLazy();
 			Container.Bind<IEcsSystem>().To<GenerateMapSystem>().AsSingle();
+			Container.Bind<IEcsSystem>().To<ChunkCreateSystem>().AsSingle();
 			Container.Bind<IEcsSystem>().To<VoxelRenderSystem>().AsSingle();
 			
 			Container.BindMemoryPool<ChunkView, ChunkView.Pool>()

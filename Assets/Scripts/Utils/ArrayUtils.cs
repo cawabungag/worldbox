@@ -1,42 +1,61 @@
-using System;
+using System.Collections.Generic;
 
-namespace DefaultNamespace.Utils
+public static class ArrayUtils
 {
-	public class ArrayUtils
+	public static void AddOrCreateValue<TK, TV>(this Dictionary<TK, List<TV>> dictionary,
+		TK newKey,
+		TV newValue)
 	{
-		public static T[,] SplitArray<T>(T[] arr, int blockSize)
+		if (dictionary.TryGetValue(newKey, out var value))
 		{
-			var numBlocks = (int)Math.Ceiling((double)arr.Length / blockSize);
-			var numRows = numBlocks;
-			var numCols = blockSize;
-			var blocks = new T[numRows, numCols];
-			var index = 0;
-			for (var i = 0; i < numRows; i++)
-			{
-				for (var j = 0; j < numCols; j++)
-				{
-					if (index < arr.Length)
-					{
-						blocks[i, j] = arr[index];
-						index++;
-					}
-					else
-					{
-						break;
-					}
-				}
-			}
-			return blocks;
+			value.Add(newValue);
+			return;
 		}
 
-		public static int[,] Slice(int[][] board, int xStart, int yStart, int xFinish, int yFinish)
-		{
-			var result = new int[xFinish - xStart, yFinish - yStart];
-			for (var i = xStart; i < xFinish; i++)
-			for (var j = yStart; j < yFinish; j++)
-				result[i - xStart, j - yStart] = board[i][j];
+		dictionary.Add(newKey, new List<TV> {newValue});
+	}
 
-			return result;
+	public static T[,] ToRectangular<T>(this T[] original, int size)
+	{
+		var arr = new T[size, size];
+		var x = 0;
+		var y = 0;
+
+		for (int i = 0; i < original.Length; i++)
+		{
+			arr[y, x] = original[i];
+			x++;
+
+			if (x != size)
+				continue;
+
+			x = 0;
+			y++;
 		}
+
+		// for (var i = 0; i < original.Length; ++i)
+		// {
+		// 	arr[x, y] = original[i];
+		// 	x++;
+		//
+		// 	if (x != size)
+		// 		continue;
+		//
+		// 	x = 0;
+		// 	y++;
+		// }
+
+		return arr;
+	}
+
+	public static int[,] Slice(this int[,] board, int xStart, int yStart, int xFinish, int yFinish)
+	{
+		var result = new int[xFinish - xStart, yFinish - yStart];
+		
+		for (var x = xStart; x < xFinish; x++)
+		for (var y = yStart; y < yFinish; y++)
+			result[x - xStart, y - yStart] = board[x, y];
+
+		return result;
 	}
 }

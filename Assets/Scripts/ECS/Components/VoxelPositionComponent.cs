@@ -4,6 +4,6 @@ namespace ECS.Components
 {
 	public struct VoxelPositionComponent
 	{
-		public Vector3Int Value;
+		public Vector2Int Value;
 	}
 }
