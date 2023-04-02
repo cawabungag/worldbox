@@ -15,7 +15,7 @@ namespace ECS.Systems
 		{
 			_poolChunks = poolChunks;
 		}
-		
+
 		public void Init(IEcsSystems systems)
 		{
 			var timestamp1 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
@@ -30,44 +30,45 @@ namespace ECS.Systems
 			var poolChunkViewComponent = world.GetPool<ChunkViewCompoenent>();
 			var poolChunkEntityComponent = world.GetPool<ChunkEntityComponent>();
 			var rawEntities = entities.GetRawEntities();
-			
-			var worldSideSize = (int) Mathf.Sqrt(WorldUtils.WORLD_SIZE);
-			var splitArray = rawEntities.ToRectangular(WorldUtils.WORLD_SIZE);
-			
-			var nextCoord = new Vector2Int(worldSideSize, worldSideSize);
+			var splitArray = rawEntities.ToRectangular();
+
+			var nextCoord = new Vector2Int(WorldUtils.CHUNK_SIZE, WorldUtils.CHUNK_SIZE);
 			var startCoord = new Vector2Int();
 
-			for (int y = 0; y < worldSideSize; y++)
+			var length = splitArray.GetLength(1);
+			var lengthY = length / WorldUtils.CHUNK_SIZE;
+			for (int y = 0; y < lengthY; y++)
 			{
-				var chunkEntity = world.NewEntity();
-				poolChunkComponent.Add(chunkEntity).Value = new Vector4(startCoord.x, startCoord.y, nextCoord.x, nextCoord.y);
-				poolChunkViewComponent.Add(chunkEntity).Value = _poolChunks.Spawn();
-				
-				for (int x = 0; x < worldSideSize; x++)
+				var l = splitArray.GetLength(0);
+				var lengthX = l / WorldUtils.CHUNK_SIZE;
+				for (int x = 0; x < lengthX; x++)
 				{
+					var chunkEntity = world.NewEntity();
+					var chunk = new Vector4(startCoord.x, startCoord.y, nextCoord.x, nextCoord.y);
+					poolChunkComponent.Add(chunkEntity).Value = chunk;
+					Debug.LogError($"Chunk: {chunk}");
+					poolChunkViewComponent.Add(chunkEntity).Value = _poolChunks.Spawn();
 					var sliceBoard = splitArray.Slice(startCoord.x, startCoord.y, nextCoord.x, nextCoord.y);
+
 					for (int i = 0; i < sliceBoard.GetLength(0); i++)
 					{
-						for (int k = 0; k < sliceBoard.GetLength(1); k++)
+						for (int j = 0; j < sliceBoard.GetLength(1); j++)
 						{
-							var entity = sliceBoard[i, k];
-
-							//todo: Refactoring
-							if (!poolChunkEntityComponent.Has(entity))
-							{
-								poolChunkEntityComponent.Add(entity).Value = chunkEntity;
-							}
+							poolChunkEntityComponent.Add(sliceBoard[i, j]).Value = chunkEntity;
 						}
 					}
-				}
-				
-				startCoord.x = 0;
-				nextCoord.x = worldSideSize;
 
-				startCoord.y += worldSideSize;
-				nextCoord.y += worldSideSize;
+					startCoord.x += WorldUtils.CHUNK_SIZE;
+					nextCoord.x += WorldUtils.CHUNK_SIZE;
+				}
+
+				startCoord.x = 0;
+				nextCoord.x = WorldUtils.CHUNK_SIZE;
+
+				startCoord.y += WorldUtils.CHUNK_SIZE;
+				nextCoord.y += WorldUtils.CHUNK_SIZE;
 			}
-			
+
 			var timestamp2 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
 			Debug.Log($"GenerateMapSystem: {timestamp2 - timestamp1}");
 		}

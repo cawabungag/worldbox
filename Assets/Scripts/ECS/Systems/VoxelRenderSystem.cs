@@ -14,7 +14,7 @@ namespace ECS.Systems
 		private readonly Dictionary<Vector4, List<Vector2>> _textures = new();
 		private readonly Dictionary<Vector4, List<Vector3>> _vertices = new();
 		private readonly Dictionary<Vector4, List<int>> _triangles = new();
-		private int _faceCount;
+		private Dictionary<Vector4, int> _faceCount = new();
 		private EcsWorld _world;
 
 		public void Init(IEcsSystems systems)
@@ -25,12 +25,19 @@ namespace ECS.Systems
 			var poolChunkViewComponent = _world.GetPool<ChunkViewCompoenent>();
 			var poolChunkEntityComponent = _world.GetPool<ChunkEntityComponent>();
 
-			var entities = _world.Filter<VoxelPositionComponent>()
-				.Inc<VoxelTypeComponent>()
-				.End();
-
+			var entities = _world.Filter<VoxelPositionComponent>().Inc<VoxelTypeComponent>().End();
 			if (entities.GetEntitiesCount() == 0)
 				return;
+
+			var chunksEntities = _world.Filter<ChunkComponent>().End();
+			if (chunksEntities.GetEntitiesCount() == 0)
+				return;
+
+			foreach (var entity in chunksEntities)
+			{
+				var chunk = poolChunkComponent.Get(entity).Value;
+				_faceCount.Add(chunk, 0);
+			}
 
 			foreach (var entity in entities)
 			{
@@ -38,7 +45,7 @@ namespace ECS.Systems
 				var chunkBounds = poolChunkComponent.Get(chunkEntity).Value;
 				var position = _world.GetPool<VoxelPositionComponent>().Get(entity).Value;
 				var voxel = _world.GetPool<VoxelTypeComponent>().Get(entity).Value;
-				
+
 				for (int y = 0; y < (int) voxel; y++)
 				{
 					var x = position.x;
@@ -46,24 +53,22 @@ namespace ECS.Systems
 					CreateVoxelGeometry(new Vector3Int(x, y, z), voxel, 1, chunkBounds);
 				}
 			}
-			
-			var chunksEntities = _world.Filter<ChunkComponent>().End();
-			if (chunksEntities.GetEntitiesCount() == 0)
-				return;
 
 			foreach (var entity in chunksEntities)
 			{
 				var chunkView = poolChunkViewComponent.Get(entity).Value;
 				var chunk = poolChunkComponent.Get(entity).Value;
-				
-				var mesh = new Mesh
-				{
-					indexFormat = IndexFormat.UInt32,
-					vertices = _vertices[chunk].ToArray(),
-					triangles = _triangles[chunk].ToArray(),
-					uv = _textures[chunk].ToArray()
-				};
-				
+
+				var meshVertices = _vertices[chunk].ToArray();
+				var meshTriangles = _triangles[chunk].ToArray();
+				var meshUV = _textures[chunk].ToArray();
+
+				var mesh = new Mesh();
+				mesh.indexFormat = IndexFormat.UInt32;
+				mesh.vertices = meshVertices;
+				mesh.triangles = meshTriangles;
+				mesh.uv = meshUV;
+
 				mesh.RecalculateNormals();
 				mesh.Optimize();
 				chunkView.MeshFilter.mesh = mesh;
@@ -75,6 +80,7 @@ namespace ECS.Systems
 
 		private void CreateVoxelGeometry(Vector3Int position, VoxelType voxelType, int voxelSize, Vector4 chunkBounds)
 		{
+			Debug.LogError($"CreateVoxelGeometry: {chunkBounds}");
 			var x = position.x;
 			var y = position.y;
 			var z = position.z;
@@ -87,16 +93,16 @@ namespace ECS.Systems
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z + 1) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z + 1) * voxelSize);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 1);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 3);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3);
 
 				AddTexture(voxelType, chunkBounds);
 
-				_faceCount++;
+				_faceCount[chunkBounds] += 1;
 			}
 
 			// Back
@@ -107,16 +113,17 @@ namespace ECS.Systems
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z) * voxelSize);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 1);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 3);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3);
 
 				AddTexture(voxelType, chunkBounds);
 
-				_faceCount++;
+
+				_faceCount[chunkBounds] += 1;
 			}
 
 			// Top
@@ -127,16 +134,16 @@ namespace ECS.Systems
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z + 1) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z + 1) * voxelSize);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 1);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 3);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3);
 
 				AddTexture(voxelType, chunkBounds);
 
-				_faceCount++;
+				_faceCount[chunkBounds] += 1;
 			}
 
 			// Bottom
@@ -147,16 +154,16 @@ namespace ECS.Systems
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z + 1) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z + 1) * voxelSize);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 1);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 3);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3);
 
 				AddTexture(voxelType, chunkBounds);
 
-				_faceCount++;
+				_faceCount[chunkBounds] += 1;
 			}
 
 			// Left
@@ -167,16 +174,16 @@ namespace ECS.Systems
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z + 1) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z) * voxelSize);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 1);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 3);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3);
 
 				AddTexture(voxelType, chunkBounds);
 
-				_faceCount++;
+				_faceCount[chunkBounds] += 1;
 			}
 
 			// Right
@@ -187,20 +194,20 @@ namespace ECS.Systems
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z + 1) * voxelSize);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 1);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 0);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 2);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount * 4 + 3);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 0);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2);
+				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3);
 
 				AddTexture(voxelType, chunkBounds);
 
-				_faceCount++;
+				_faceCount[chunkBounds] += 1;
 			}
 		}
 
-		void AddTexture(VoxelType textureIndex, Vector4 chunkBounds)
+		private void AddTexture(VoxelType textureIndex, Vector4 chunkBounds)
 		{
 			switch (textureIndex)
 			{
