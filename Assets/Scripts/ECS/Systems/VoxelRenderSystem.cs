@@ -4,6 +4,8 @@ using DefaultNamespace.Utils;
 using ECS.Components;
 using Game.Services.MapGenerator;
 using Leopotam.EcsLite;
+using Services.Map;
+using UI;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -11,22 +13,35 @@ namespace ECS.Systems
 {
 	public class VoxelRenderSystem : IEcsInitSystem
 	{
+		private readonly IMapService _mapService;
+		private readonly VoxelRenderCounter _counter;
+		
 		private readonly Dictionary<Vector4, List<Vector2>> _textures = new();
 		private readonly Dictionary<Vector4, List<Vector3>> _vertices = new();
 		private readonly Dictionary<Vector4, List<int>> _triangles = new();
 		private Dictionary<Vector4, int> _faceCount = new();
 		private EcsWorld _world;
+		private EcsFilter _voxelEntities;
+
+		public VoxelRenderSystem(IMapService mapService, VoxelRenderCounter counter)
+		{
+			_mapService = mapService;
+			_counter = counter;
+		}
 
 		public void Init(IEcsSystems systems)
 		{
 			var timestamp1 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
+
 			_world = systems.GetWorld();
 			var poolChunkComponent = _world.GetPool<ChunkComponent>();
 			var poolChunkViewComponent = _world.GetPool<ChunkViewCompoenent>();
 			var poolChunkEntityComponent = _world.GetPool<ChunkEntityComponent>();
+			var poolVoxelPostionComponent = _world.GetPool<VoxelPositionComponent>();
+			var poolVoxelTypeCompoenent = _world.GetPool<VoxelTypeComponent>();
 
-			var entities = _world.Filter<VoxelPositionComponent>().Inc<VoxelTypeComponent>().End();
-			if (entities.GetEntitiesCount() == 0)
+			_voxelEntities = _world.Filter<VoxelPositionComponent>().Inc<VoxelTypeComponent>().End();
+			if (_voxelEntities.GetEntitiesCount() == 0)
 				return;
 
 			var chunksEntities = _world.Filter<ChunkComponent>().End();
@@ -39,12 +54,13 @@ namespace ECS.Systems
 				_faceCount.Add(chunk, 0);
 			}
 
-			foreach (var entity in entities)
+			var count = 0;
+			foreach (var entity in _voxelEntities)
 			{
 				var chunkEntity = poolChunkEntityComponent.Get(entity).Value;
 				var chunkBounds = poolChunkComponent.Get(chunkEntity).Value;
-				var position = _world.GetPool<VoxelPositionComponent>().Get(entity).Value;
-				var voxel = _world.GetPool<VoxelTypeComponent>().Get(entity).Value;
+				var position = poolVoxelPostionComponent.Get(entity).Value;
+				var voxel = poolVoxelTypeCompoenent.Get(entity).Value;
 
 				for (int y = 0; y < (int) voxel; y++)
 				{
@@ -52,7 +68,12 @@ namespace ECS.Systems
 					var z = position.y;
 					CreateVoxelGeometry(new Vector3Int(x, y, z), voxel, 1, chunkBounds);
 				}
+
+				count++;
+				var entitiesCount = (float)count/_voxelEntities.GetEntitiesCount();
+				_counter.SetText($"{entitiesCount * 100}%");
 			}
+			
 
 			foreach (var entity in chunksEntities)
 			{
@@ -75,7 +96,7 @@ namespace ECS.Systems
 			}
 
 			var timestamp2 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-			Debug.Log($"VoxelRenderSystem: {timestamp2 - timestamp1}");
+			Debug.Log($"PERFOMANCE: VoxelRenderSystem: {timestamp2 - timestamp1}");
 		}
 
 		private void CreateVoxelGeometry(Vector3Int position, VoxelType voxelType, int voxelSize, Vector4 chunkBounds)
@@ -86,7 +107,7 @@ namespace ECS.Systems
 			var z = position.z;
 
 			// Front
-			if (IsTransparent(x, y, z + 1))
+			if (_mapService.IsTransparent(x, y, z + 1))
 			{
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z + 1) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z + 1) * voxelSize);
@@ -106,7 +127,7 @@ namespace ECS.Systems
 			}
 
 			// Back
-			if (IsTransparent(x, y, z - 1))
+			if (_mapService.IsTransparent(x, y, z - 1))
 			{
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z) * voxelSize);
@@ -127,7 +148,7 @@ namespace ECS.Systems
 			}
 
 			// Top
-			if (IsTransparent(x, y + 1, z))
+			if (_mapService.IsTransparent(x, y + 1, z))
 			{
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z) * voxelSize);
@@ -147,7 +168,7 @@ namespace ECS.Systems
 			}
 
 			// Bottom
-			if (IsTransparent(x, y - 1, z))
+			if (_mapService.IsTransparent(x, y - 1, z))
 			{
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z) * voxelSize);
@@ -167,7 +188,7 @@ namespace ECS.Systems
 			}
 
 			// Left
-			if (IsTransparent(x - 1, y, z))
+			if (_mapService.IsTransparent(x - 1, y, z))
 			{
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z + 1) * voxelSize);
@@ -187,7 +208,7 @@ namespace ECS.Systems
 			}
 
 			// Right
-			if (IsTransparent(x + 1, y, z))
+			if (_mapService.IsTransparent(x + 1, y, z))
 			{
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z + 1) * voxelSize);
 				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z) * voxelSize);
@@ -248,11 +269,6 @@ namespace ECS.Systems
 					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.stoned);
 					break;
 			}
-		}
-
-		bool IsTransparent(int x, int y, int z)
-		{
-			return true;
 		}
 	}
 }

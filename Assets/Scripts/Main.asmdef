@@ -2,6 +2,7 @@
   "name": "Main",
   "references": [
     "Zenject",
-    "Leopotam.EcsLite"
+    "Leopotam.EcsLite",
+    "Unity.TextMeshPro"
   ]
 }

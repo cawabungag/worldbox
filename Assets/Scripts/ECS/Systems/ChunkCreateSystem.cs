@@ -70,7 +70,7 @@ namespace ECS.Systems
 			}
 
 			var timestamp2 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-			Debug.Log($"GenerateMapSystem: {timestamp2 - timestamp1}");
+			Debug.Log($"PERFOMANCE: GenerateMapSystem: {timestamp2 - timestamp1}");
 		}
 	}
 }

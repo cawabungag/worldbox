@@ -3,6 +3,7 @@ using DefaultNamespace.Utils;
 using ECS.Components;
 using Game.Services.MapGenerator;
 using Leopotam.EcsLite;
+using Services.Map;
 using UnityEngine;
 
 namespace ECS.Systems
@@ -10,9 +11,13 @@ namespace ECS.Systems
 	public class GenerateMapSystem : IEcsInitSystem
 	{
 		private readonly IMapGenerator _mapGenerator;
+		private readonly IMapService _mapService;
 
-		public GenerateMapSystem(IMapGenerator mapGenerator)
-			=> _mapGenerator = mapGenerator;
+		public GenerateMapSystem(IMapGenerator mapGenerator, IMapService mapService)
+		{
+			_mapGenerator = mapGenerator;
+			_mapService = mapService;
+		}
 
 		public void Init(IEcsSystems systems)
 		{
@@ -37,11 +42,16 @@ namespace ECS.Systems
 					var voxelEntity = world.NewEntity();
 					voxelPositionPool.Add(voxelEntity).Value = new Vector2Int(x, z);
 					voxelTypePool.Add(voxelEntity).Value = tileType;
+
+					for (int y = 0; y < (byte)tileType; y++)
+					{
+						_mapService.AddVoxel(new VoxelData(new Vector3Int(x, y, z), tileType));
+					}
 				}
 			}
 
 			var timestamp2 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-			Debug.Log($"GenerateMapSystem: {timestamp2 - timestamp1}");
+			Debug.Log($"PERFOMANCE: GenerateMapSystem: {timestamp2 - timestamp1}");
 		}
 	}
 }

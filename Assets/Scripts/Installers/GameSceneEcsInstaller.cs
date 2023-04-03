@@ -1,5 +1,6 @@
 using DefaultNamespace;
 using DefaultNamespace.Chunk;
+using DefaultNamespace.Utils;
 using ECS.Systems;
 using Leopotam.EcsLite;
 using UnityEngine;
@@ -20,7 +21,7 @@ namespace Installers
 			Container.Bind<IEcsSystem>().To<VoxelRenderSystem>().AsSingle();
 			
 			Container.BindMemoryPool<ChunkView, ChunkView.Pool>()
-				.WithInitialSize(10)
+				.WithInitialSize(16)
 				.FromComponentInNewPrefab(_chunkView)
 				.UnderTransformGroup("Chunks");
 		}
