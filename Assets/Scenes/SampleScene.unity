@@ -793,6 +793,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ChunkView
       objectReference: {fileID: 0}
+    - target: {fileID: 8672665192045178162, guid: 3b75e93157ead42a79ea061e30e92527, type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8672665192045178164, guid: 3b75e93157ead42a79ea061e30e92527, type: 3}
       propertyPath: m_RootOrder
       value: 4

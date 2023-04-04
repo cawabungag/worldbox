@@ -60,13 +60,13 @@ namespace ECS.Systems
 				var chunkEntity = poolChunkEntityComponent.Get(entity).Value;
 				var chunkBounds = poolChunkComponent.Get(chunkEntity).Value;
 				var position = poolVoxelPostionComponent.Get(entity).Value;
-				var voxel = poolVoxelTypeCompoenent.Get(entity).Value;
+				var voxelType = poolVoxelTypeCompoenent.Get(entity).Value;
 
-				for (int y = 0; y < (int) voxel; y++)
+				for (int y = 0; y < (int) voxelType; y++)
 				{
 					var x = position.x;
 					var z = position.y;
-					CreateVoxelGeometry(new Vector3Int(x, y, z), voxel, 1, chunkBounds);
+					CreateVoxelGeometry(new Vector3Int(x, y, z), y.ToVoxelType(), 1, chunkBounds);
 				}
 
 				count++;
@@ -267,6 +267,12 @@ namespace ECS.Systems
 					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.stoneb);
 					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.stonec);
 					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.stoned);
+					break;
+				default:
+					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundA);
+					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundb);
+					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundc);
+					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundd);
 					break;
 			}
 		}
