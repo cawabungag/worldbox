@@ -16,12 +16,13 @@ namespace ECS.Systems
 		private readonly IMapService _mapService;
 		private readonly VoxelRenderCounter _counter;
 		
+		private EcsWorld _world;
+		private EcsFilter _voxelEntities;
+		
 		private readonly Dictionary<Vector4, List<Vector2>> _textures = new();
 		private readonly Dictionary<Vector4, List<Vector3>> _vertices = new();
 		private readonly Dictionary<Vector4, List<int>> _triangles = new();
 		private Dictionary<Vector4, int> _faceCount = new();
-		private EcsWorld _world;
-		private EcsFilter _voxelEntities;
 
 		public VoxelRenderSystem(IMapService mapService, VoxelRenderCounter counter)
 		{

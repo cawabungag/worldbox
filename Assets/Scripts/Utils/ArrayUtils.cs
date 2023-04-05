@@ -15,20 +15,6 @@ public static class ArrayUtils
 
 		dictionary.Add(newKey, new List<TV> {newValue});
 	}
-	
-	public static void AddOrCreateValue<TK>(this Dictionary<TK, int> dictionary,
-		TK newKey,
-		int newValue)
-	{
-		if (dictionary.TryGetValue(newKey, out var value))
-		{
-			value += newValue;
-			dictionary[newKey] = value;
-			return;
-		}
-
-		dictionary.Add(newKey, newValue);
-	}
 
 	public static T[,] ToRectangular<T>(this T[] original)
 	{
@@ -48,19 +34,6 @@ public static class ArrayUtils
 			x = 0;
 			y++;
 		}
-
-		// for (var i = 0; i < original.Length; ++i)
-		// {
-		// 	arr[x, y] = original[i];
-		// 	x++;
-		//
-		// 	if (x != size)
-		// 		continue;
-		//
-		// 	x = 0;
-		// 	y++;
-		// }
-
 		return arr;
 	}
 
