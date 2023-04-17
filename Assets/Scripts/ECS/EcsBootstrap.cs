@@ -6,13 +6,14 @@ namespace DefaultNamespace
 {
 	public class EcsBootstrap : IInitializable, ITickable, IDisposable
 	{
-		private readonly IEcsSystem[] systems;
+		private readonly IEcsSystem[] _ecsSystems;
 		private EcsWorld _world;
 		private EcsSystems _systems;
 
-		public EcsBootstrap(IEcsSystem[] systems)
+		public EcsBootstrap(IEcsSystem[] ecsSystems, EcsWorld ecsWorld)
 		{
-			this.systems = systems;
+			_ecsSystems = ecsSystems;
+			_world = ecsWorld;
 		}
 
 		public void Initialize()
@@ -20,7 +21,7 @@ namespace DefaultNamespace
 			_world = new EcsWorld();
 			_systems = new EcsSystems(_world);
 
-			foreach (var system in systems) 
+			foreach (var system in _ecsSystems) 
 				_systems.Add(system);
 
 			_systems.Init();

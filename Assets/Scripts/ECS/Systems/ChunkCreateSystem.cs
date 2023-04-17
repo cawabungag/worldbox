@@ -1,7 +1,7 @@
 using System;
 using DefaultNamespace.Chunk;
 using DefaultNamespace.Utils;
-using ECS.Components;
+using ECS.Components.Map;
 using Leopotam.EcsLite;
 using UnityEngine;
 
@@ -35,18 +35,17 @@ namespace ECS.Systems
 			var nextCoord = new Vector2Int(WorldUtils.CHUNK_SIZE, WorldUtils.CHUNK_SIZE);
 			var startCoord = new Vector2Int();
 
-			var length = splitArray.GetLength(1);
-			var lengthY = length / WorldUtils.CHUNK_SIZE;
+			var lengthFirstDimension = splitArray.GetLength(1);
+			var lengthY = lengthFirstDimension / WorldUtils.CHUNK_SIZE;
 			for (int y = 0; y < lengthY; y++)
 			{
-				var l = splitArray.GetLength(0);
-				var lengthX = l / WorldUtils.CHUNK_SIZE;
+				var lengthSecondDimension = splitArray.GetLength(0);
+				var lengthX = lengthSecondDimension / WorldUtils.CHUNK_SIZE;
 				for (int x = 0; x < lengthX; x++)
 				{
 					var chunkEntity = world.NewEntity();
 					var chunk = new Vector4(startCoord.x, startCoord.y, nextCoord.x, nextCoord.y);
 					poolChunkComponent.Add(chunkEntity).Value = chunk;
-					Debug.LogError($"Chunk: {chunk}");
 					poolChunkViewComponent.Add(chunkEntity).Value = _poolChunks.Spawn();
 					var sliceBoard = splitArray.Slice(startCoord.x, startCoord.y, nextCoord.x, nextCoord.y);
 

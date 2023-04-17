@@ -15,6 +15,12 @@ namespace Installers
 		
 		public override void InstallBindings()
 		{
+			var ecsWorld = new EcsWorld();
+			Container.BindInstance(ecsWorld);
+
+			var inputEcsWorld = new EcsWorld();
+			Container.BindInstance(inputEcsWorld).WithId(WorldUtils.INPUT_WORLD_NAME);
+			
 			Container.BindInterfacesTo<EcsBootstrap>().AsSingle().NonLazy();
 			Container.Bind<IEcsSystem>().To<GenerateMapSystem>().AsSingle();
 			Container.Bind<IEcsSystem>().To<ChunkCreateSystem>().AsSingle();

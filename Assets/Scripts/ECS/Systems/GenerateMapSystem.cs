@@ -1,6 +1,6 @@
 using System;
 using DefaultNamespace.Utils;
-using ECS.Components;
+using ECS.Components.Map;
 using Game.Services.MapGenerator;
 using Leopotam.EcsLite;
 using Services.Map;
@@ -40,12 +40,13 @@ namespace ECS.Systems
 					var tileType = voxels[WorldUtils.WORLD_SIZE * i + j];
 
 					var voxelEntity = world.NewEntity();
-					voxelPositionPool.Add(voxelEntity).Value = new Vector2Int(x, z);
+					var cellPosiiton = new Vector2Int(x, z);
+					voxelPositionPool.Add(voxelEntity).Value = cellPosiiton;
 					voxelTypePool.Add(voxelEntity).Value = tileType;
 
 					for (int y = 0; y < (byte)tileType; y++)
 					{
-						_mapService.AddVoxel(new VoxelData(new Vector3Int(x, y, z), tileType));
+						_mapService.AddVoxel(new VoxelData(new Vector3Int(x, y, z), tileType, cellPosiiton));
 					}
 				}
 			}

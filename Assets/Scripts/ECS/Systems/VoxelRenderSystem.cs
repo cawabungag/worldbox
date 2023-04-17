@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using DefaultNamespace.Utils;
-using ECS.Components;
+using ECS.Components.Map;
 using Game.Services.MapGenerator;
 using Leopotam.EcsLite;
 using Services.Map;
-using UI;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -14,7 +13,6 @@ namespace ECS.Systems
 	public class VoxelRenderSystem : IEcsInitSystem
 	{
 		private readonly IMapService _mapService;
-		private readonly VoxelRenderCounter _counter;
 		
 		private EcsWorld _world;
 		private EcsFilter _voxelEntities;
@@ -24,10 +22,9 @@ namespace ECS.Systems
 		private readonly Dictionary<Vector4, List<int>> _triangles = new();
 		private Dictionary<Vector4, int> _faceCount = new();
 
-		public VoxelRenderSystem(IMapService mapService, VoxelRenderCounter counter)
+		public VoxelRenderSystem(IMapService mapService)
 		{
 			_mapService = mapService;
-			_counter = counter;
 		}
 
 		public void Init(IEcsSystems systems)
@@ -71,8 +68,8 @@ namespace ECS.Systems
 				}
 
 				count++;
-				var entitiesCount = (float)count/_voxelEntities.GetEntitiesCount();
-				_counter.SetText($"{entitiesCount * 100}%");
+				// var entitiesCount = (float)count/_voxelEntities.GetEntitiesCount();
+				// _counter.SetText($"{entitiesCount * 100}%");
 			}
 			
 
@@ -102,7 +99,6 @@ namespace ECS.Systems
 
 		private void CreateVoxelGeometry(Vector3Int position, VoxelType voxelType, int voxelSize, Vector4 chunkBounds)
 		{
-			Debug.LogError($"CreateVoxelGeometry: {chunkBounds}");
 			var x = position.x;
 			var y = position.y;
 			var z = position.z;
