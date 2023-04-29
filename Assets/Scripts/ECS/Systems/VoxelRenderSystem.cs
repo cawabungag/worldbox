@@ -17,10 +17,10 @@ namespace ECS.Systems
 		private EcsWorld _world;
 		private EcsFilter _voxelEntities;
 		
-		private readonly Dictionary<Vector4, List<Vector2>> _textures = new();
-		private readonly Dictionary<Vector4, List<Vector3>> _vertices = new();
-		private readonly Dictionary<Vector4, List<int>> _triangles = new();
-		private Dictionary<Vector4, int> _faceCount = new();
+		private readonly Dictionary<Vector4Int, List<Vector2>> _textures = new();
+		private readonly Dictionary<Vector4Int, List<Vector3>> _vertices = new();
+		private readonly Dictionary<Vector4Int, List<int>> _triangles = new();
+		private Dictionary<Vector4Int, int> _faceCount = new();
 
 		public VoxelRenderSystem(IMapService mapService)
 		{
@@ -52,7 +52,6 @@ namespace ECS.Systems
 				_faceCount.Add(chunk, 0);
 			}
 
-			var count = 0;
 			foreach (var entity in _voxelEntities)
 			{
 				var chunkEntity = poolChunkEntityComponent.Get(entity).Value;
@@ -66,12 +65,7 @@ namespace ECS.Systems
 					var z = position.y;
 					CreateVoxelGeometry(new Vector3Int(x, y, z), y.ToVoxelType(), 1, chunkBounds);
 				}
-
-				count++;
-				// var entitiesCount = (float)count/_voxelEntities.GetEntitiesCount();
-				// _counter.SetText($"{entitiesCount * 100}%");
 			}
-			
 
 			foreach (var entity in chunksEntities)
 			{
@@ -97,7 +91,7 @@ namespace ECS.Systems
 			Debug.Log($"PERFOMANCE: VoxelRenderSystem: {timestamp2 - timestamp1}");
 		}
 
-		private void CreateVoxelGeometry(Vector3Int position, VoxelType voxelType, int voxelSize, Vector4 chunkBounds)
+		private void CreateVoxelGeometry(Vector3Int position, VoxelType voxelType, int voxelSize, Vector4Int chunkBounds)
 		{
 			var x = position.x;
 			var y = position.y;
@@ -225,7 +219,7 @@ namespace ECS.Systems
 			}
 		}
 
-		private void AddTexture(VoxelType textureIndex, Vector4 chunkBounds)
+		private void AddTexture(VoxelType textureIndex, Vector4Int chunkBounds)
 		{
 			switch (textureIndex)
 			{

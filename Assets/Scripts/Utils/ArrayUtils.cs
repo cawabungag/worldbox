@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using DefaultNamespace.Utils;
+using UnityEngine;
 
 public static class ArrayUtils
 {
-	public static void AddOrCreateValue<TK, TV>(this Dictionary<TK, List<TV>> dictionary,
-		TK newKey,
-		TV newValue)
+	public static void AddOrCreateValue(this Dictionary<Vector4Int, List<Vector3>> dictionary,
+		Vector4Int newKey,
+		Vector3 newValue,
+		List<Vector3> buffer = null)
 	{
 		if (dictionary.TryGetValue(newKey, out var value))
 		{
@@ -13,7 +16,59 @@ public static class ArrayUtils
 			return;
 		}
 
-		dictionary.Add(newKey, new List<TV> {newValue});
+		if (buffer == null)
+		{
+			dictionary.Add(newKey, new List<Vector3>(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE) {newValue});
+		}
+		else
+		{
+			buffer.Add(newValue);
+			dictionary.Add(newKey, buffer);
+		}
+	}
+
+	public static void AddOrCreateValue(this Dictionary<Vector4Int, List<Vector2>> dictionary,
+		Vector4Int newKey,
+		Vector2 newValue,
+		List<Vector2> buffer = null)
+	{
+		if (dictionary.TryGetValue(newKey, out var value))
+		{
+			value.Add(newValue);
+			return;
+		}
+
+		if (buffer == null)
+		{
+			dictionary.Add(newKey, new List<Vector2>(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE) {newValue});
+		}
+		else
+		{
+			buffer.Add(newValue);
+			dictionary.Add(newKey, buffer);
+		}
+	}
+
+	public static void AddOrCreateValue(this Dictionary<Vector4Int, List<int>> dictionary,
+		Vector4Int newKey,
+		int newValue,
+		List<int> buffer = null)
+	{
+		if (dictionary.TryGetValue(newKey, out var value))
+		{
+			value.Add(newValue);
+			return;
+		}
+
+		if (buffer == null)
+		{
+			dictionary.Add(newKey, new List<int>(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE) {newValue});
+		}
+		else
+		{
+			buffer.Add(newValue);
+			dictionary.Add(newKey, buffer);
+		}
 	}
 
 	public static T[,] ToRectangular<T>(this T[] original)
@@ -34,6 +89,7 @@ public static class ArrayUtils
 			x = 0;
 			y++;
 		}
+
 		return arr;
 	}
 

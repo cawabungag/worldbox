@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using DefaultNamespace.Chunk;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
@@ -10,6 +10,7 @@ namespace ECS.Systems
 	public class ChunkCreateSystem : IEcsInitSystem
 	{
 		private readonly ChunkView.Pool _poolChunks;
+		private readonly List<int> _voxelEntitiesBuffer = new();
 
 		public ChunkCreateSystem(ChunkView.Pool poolChunks)
 		{
@@ -18,8 +19,6 @@ namespace ECS.Systems
 
 		public void Init(IEcsSystems systems)
 		{
-			var timestamp1 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-
 			var world = systems.GetWorld();
 			var entities = world.Filter<VoxelPositionComponent>()
 				.Inc<VoxelTypeComponent>()
@@ -29,6 +28,8 @@ namespace ECS.Systems
 			var poolChunkComponent = world.GetPool<ChunkComponent>();
 			var poolChunkViewComponent = world.GetPool<ChunkViewCompoenent>();
 			var poolChunkEntityComponent = world.GetPool<ChunkEntityComponent>();
+			var poolNeedUpdateChunk = world.GetPool<NeedUpdateChunkComponent>();
+			var poolVoxelsInChunk = world.GetPool<VoxelsInChunkComponent>();
 			var rawEntities = entities.GetRawEntities();
 			var splitArray = rawEntities.ToRectangular();
 
@@ -43,20 +44,25 @@ namespace ECS.Systems
 				var lengthX = lengthSecondDimension / WorldUtils.CHUNK_SIZE;
 				for (int x = 0; x < lengthX; x++)
 				{
+					_voxelEntitiesBuffer.Clear();
 					var chunkEntity = world.NewEntity();
 					var chunk = new Vector4(startCoord.x, startCoord.y, nextCoord.x, nextCoord.y);
 					poolChunkComponent.Add(chunkEntity).Value = chunk;
 					poolChunkViewComponent.Add(chunkEntity).Value = _poolChunks.Spawn();
 					var sliceBoard = splitArray.Slice(startCoord.x, startCoord.y, nextCoord.x, nextCoord.y);
+					poolNeedUpdateChunk.Add(chunkEntity).Value = false;
 
 					for (int i = 0; i < sliceBoard.GetLength(0); i++)
 					{
 						for (int j = 0; j < sliceBoard.GetLength(1); j++)
 						{
-							poolChunkEntityComponent.Add(sliceBoard[i, j]).Value = chunkEntity;
+							var voxelEntity = sliceBoard[i, j];
+							_voxelEntitiesBuffer.Add(voxelEntity);
+							poolChunkEntityComponent.Add(voxelEntity).Value = chunkEntity;
 						}
 					}
 
+					poolVoxelsInChunk.Add(chunkEntity).Value = _voxelEntitiesBuffer.ToArray();
 					startCoord.x += WorldUtils.CHUNK_SIZE;
 					nextCoord.x += WorldUtils.CHUNK_SIZE;
 				}
@@ -67,9 +73,6 @@ namespace ECS.Systems
 				startCoord.y += WorldUtils.CHUNK_SIZE;
 				nextCoord.y += WorldUtils.CHUNK_SIZE;
 			}
-
-			var timestamp2 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-			Debug.Log($"PERFOMANCE: GenerateMapSystem: {timestamp2 - timestamp1}");
 		}
 	}
 }

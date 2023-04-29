@@ -11,7 +11,7 @@ namespace Tools
 		
 		public abstract ToolType ToolType { get; }
 
-		public BaseBrushToolStrategy(IMapService mapService, BrushesData brushesData)
+		protected BaseBrushToolStrategy(IMapService mapService, BrushesData brushesData)
 		{
 			_mapService = mapService;
 			_brushesData = brushesData;
@@ -21,6 +21,10 @@ namespace Tools
 		{
 			var brush = _brushesData.GetBrush(brushType, brushSize);
 			var entities = _mapService.GetVoxelEntities(new Vector2Int((int) worldTouchPoint.x, (int) worldTouchPoint.z), brush);
+			if (entities.Length == 0)
+				return;
+			
+			Debug.LogError($"worldTouchPoint: {worldTouchPoint}");
 			Use(entities);
 		}
 

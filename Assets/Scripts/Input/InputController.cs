@@ -12,7 +12,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Zenject;
 
-public class InputController : IInitializable, IDisposable
+public class InputController : IInitializable, IDisposable, ILateTickable
 {
 	private readonly EcsWorld _input;
 	private readonly ISceneCamera _camera;
@@ -32,7 +32,8 @@ public class InputController : IInitializable, IDisposable
 
 	public InputController([Inject(Id = WorldUtils.INPUT_WORLD_NAME)] EcsWorld input,
 		ISceneCamera camera,
-		InputView inputView, IUseToolStrategy[] toolStrategies)
+		InputView inputView,
+		IUseToolStrategy[] toolStrategies)
 	{
 		_useToolStrategies = toolStrategies.ToDictionary(x => x.ToolType);
 		_input = input;
@@ -49,9 +50,7 @@ public class InputController : IInitializable, IDisposable
 		_inputView.Down.Subscribe(OnDown).AddTo(_disposables);
 		_inputView.Drag.Subscribe(OnDrag).AddTo(_disposables);
 		_inputView.Up.Subscribe(OnUp).AddTo(_disposables);
-		Observable.EveryLateUpdate().Subscribe(OnLateUpdate).AddTo(_disposables);
 	}
-
 
 	private void OnDown(PointerEventData eventData)
 		=> _touchEvents[eventData.pointerId] = new TouchEvent(ToushState.Begin, eventData);
@@ -70,42 +69,19 @@ public class InputController : IInitializable, IDisposable
 		_touchEvents[eventData.pointerId] = new TouchEvent(ToushState.End, eventData);
 	}
 
-	private void OnLateUpdate(long obj)
-	{
-		if (_touchEvents.Values.All(t => t.IsProcessed))
-			return;
-
-		if (_touchEvents.Count == 2)
-			ProcessTwoTouches();
-		else if (_touchEvents.Count == 1)
-			ProcessOneTouch();
-
-		foreach (var entry in _touchEvents)
-		{
-			var touchEvent = entry.Value;
-			touchEvent.Process();
-			if (touchEvent.TouchState != ToushState.End)
-				continue;
-			_eventsToRemove.Add(entry.Key);
-		}
-
-		foreach (var eventId in _eventsToRemove)
-		{
-			_touchEvents.Remove(eventId);
-		}
-
-		_eventsToRemove.Clear();
-	}
-
 	private void ProcessOneTouch()
 	{
 		var touchEvent = _touchEvents.Values.First();
 
-		if (_filterTool.GetEntitiesCount() > 0)
+		if (_filterTool.GetEntitiesCount() > 0 && IsActiveTool(out var entity, out var toolType))
 		{
-			var entity = _filterTool.GetRawEntities()[0];
-			_poolDrawPosiiton.Add(entity).Value = touchEvent.Data.position;
-			_useToolStrategies[_poolInputTool.Get(entity).Value].Use(touchEvent.Data.position, BrushType.Square, 0);
+			var touchPoint = touchEvent.Data.position;
+			if (!_poolDrawPosiiton.Has(entity))
+				_poolDrawPosiiton.Add(entity).Value = touchPoint;
+			else
+				_poolDrawPosiiton.Get(entity).Value = touchPoint;
+
+			_useToolStrategies[toolType].Use(GetWorldPosition(touchPoint), BrushType.Square, 16);
 		}
 		else
 		{
@@ -122,6 +98,13 @@ public class InputController : IInitializable, IDisposable
 					break;
 			}
 		}
+	}
+
+	private bool IsActiveTool(out int entity, out ToolType toolType)
+	{
+		entity = _filterTool.GetRawEntities()[0];
+		toolType = _poolInputTool.Get(entity).Value;
+		return toolType != ToolType.None;
 	}
 
 	private void ProcessTwoTouches()
@@ -196,5 +179,32 @@ public class InputController : IInitializable, IDisposable
 		}
 
 		public void Process() => IsProcessed = true;
+	}
+
+	public void LateTick()
+	{
+		if (_touchEvents.Values.All(t => t.IsProcessed))
+			return;
+
+		if (_touchEvents.Count == 2)
+			ProcessTwoTouches();
+		else if (_touchEvents.Count == 1)
+			ProcessOneTouch();
+
+		foreach (var entry in _touchEvents)
+		{
+			var touchEvent = entry.Value;
+			touchEvent.Process();
+			if (touchEvent.TouchState != ToushState.End)
+				continue;
+			_eventsToRemove.Add(entry.Key);
+		}
+
+		foreach (var eventId in _eventsToRemove)
+		{
+			_touchEvents.Remove(eventId);
+		}
+
+		_eventsToRemove.Clear();
 	}
 }

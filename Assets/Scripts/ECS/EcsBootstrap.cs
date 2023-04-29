@@ -4,7 +4,7 @@ using Zenject;
 
 namespace DefaultNamespace
 {
-	public class EcsBootstrap : IInitializable, ITickable, IDisposable
+	public class EcsBootstrap : IInitializable, ILateTickable, IDisposable
 	{
 		private readonly IEcsSystem[] _ecsSystems;
 		private EcsWorld _world;
@@ -18,23 +18,22 @@ namespace DefaultNamespace
 
 		public void Initialize()
 		{
-			_world = new EcsWorld();
 			_systems = new EcsSystems(_world);
 
-			foreach (var system in _ecsSystems) 
+			foreach (var system in _ecsSystems)
 				_systems.Add(system);
 
 			_systems.Init();
 		}
 
-		public void Tick()
-		{
-			_systems.Run();
-		}
-
 		public void Dispose()
 		{
 			_systems.Destroy();
+		}
+
+		public void LateTick()
+		{
+			_systems.Run();
 		}
 	}
 }

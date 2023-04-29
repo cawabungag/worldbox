@@ -9,28 +9,34 @@ namespace Tools
 {
 	public class UpBrushToolStrategy : BaseBrushToolStrategy
 	{
-		private const int MINIMAL_VOXEL_TYPE = 1;
+		private const int MAXIMUM_VOXEL_TYPE = 8;
 		private readonly EcsPool<VoxelTypeComponent> _poolVoxelType;
+		private readonly EcsPool<ChunkEntityComponent> _poolChunkEntity;
+		private readonly EcsPool<NeedUpdateChunkComponent> _poolNeedUpdateChunk;
 		public override ToolType ToolType => ToolType.Up;
 
 		public UpBrushToolStrategy(IMapService mapService, BrushesData brushesData, EcsWorld world) : base(mapService,
 			brushesData)
 		{
 			_poolVoxelType = world.GetPool<VoxelTypeComponent>();
+			_poolChunkEntity = world.GetPool<ChunkEntityComponent>();
+			_poolNeedUpdateChunk = world.GetPool<NeedUpdateChunkComponent>();
 		}
 
 		protected override void Use(int[] entities)
 		{
-			if (entities.Length == 0)
-				return;
-
 			foreach (var entity in entities)
 			{
-				if (!_poolVoxelType.Has(entity))
+				if (!_poolVoxelType.Has(entity)
+					|| !_poolChunkEntity.Has(entity))
 					continue;
 
-				ref var voxelType = ref _poolVoxelType.Get(entity).Value;
-				voxelType = (VoxelType) Mathf.Max((int) voxelType--, MINIMAL_VOXEL_TYPE);
+				var voxelType = _poolVoxelType.Get(entity).Value;
+				var newVoxelType = voxelType + 1;
+				newVoxelType = (VoxelType) Mathf.Min((int) newVoxelType, MAXIMUM_VOXEL_TYPE);
+				var chunkEntity = _poolChunkEntity.Get(entity).Value;
+				_poolVoxelType.Get(entity).Value = newVoxelType;
+				_poolNeedUpdateChunk.Get(chunkEntity).Value = true;
 			}
 		}
 	}

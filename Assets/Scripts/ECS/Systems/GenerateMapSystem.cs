@@ -1,4 +1,3 @@
-using System;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
 using Game.Services.MapGenerator;
@@ -21,8 +20,6 @@ namespace ECS.Systems
 
 		public void Init(IEcsSystems systems)
 		{
-			var timestamp1 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-
 			var world = systems.GetWorld();
 			var voxelPositionPool = world.GetPool<VoxelPositionComponent>();
 			var voxelTypePool = world.GetPool<VoxelTypeComponent>();
@@ -43,14 +40,8 @@ namespace ECS.Systems
 					var cellPosiiton = new Vector2Int(x, z);
 					voxelPositionPool.Add(voxelEntity).Value = cellPosiiton;
 					voxelTypePool.Add(voxelEntity).Value = tileType;
-
-					for (int y = 0; y < (byte)tileType; y++)
-						_mapService.AddVoxel(new VoxelData(new Vector3Int(x, y, z), tileType, cellPosiiton));
 				}
 			}
-
-			var timestamp2 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-			Debug.Log($"PERFOMANCE: GenerateMapSystem: {timestamp2 - timestamp1}");
 		}
 	}
 }

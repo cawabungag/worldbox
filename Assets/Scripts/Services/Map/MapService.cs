@@ -5,15 +5,16 @@ using ECS.Components.Map;
 using Game.Services.MapGenerator;
 using Leopotam.EcsLite;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Services.Map
 {
 	public class MapService : IMapService
 	{
-		private readonly List<int> _entitiesBuffer = new ();
+		private readonly List<int> _entitiesBuffer = new();
 		private readonly Dictionary<Vector3Int, VoxelData> _voxelDataBuffer = new();
 		private readonly Dictionary<Vector2Int, (VoxelType voxelType, int entity)> _higestVoxelOnCellBuffer = new();
-		
+
 		private EcsPool<VoxelPositionComponent> _poolVoxelPosition;
 		private EcsPool<VoxelTypeComponent> _poolVoxelType;
 		private EcsFilter _filterVoxelPosition;
@@ -22,31 +23,45 @@ namespace Services.Map
 		{
 			_poolVoxelPosition = world.GetPool<VoxelPositionComponent>();
 			_poolVoxelType = world.GetPool<VoxelTypeComponent>();
-			
 			_filterVoxelPosition = world.Filter<VoxelPositionComponent>().End();
 		}
-		
+
 		public void AddVoxel(VoxelData voxelData)
+		{
+			_voxelDataBuffer.Add(voxelData.Position, voxelData);
+		}
+
+		public void UpdateVoxel(VoxelData voxelData)
 		{
 			_voxelDataBuffer.Add(voxelData.Position, voxelData);
 		}
 
 		public bool IsTransparent(int x, int y, int z)
 		{
+			Profiler.BeginSample("IsTransparent");
 			var pos = new Vector3Int(x, y, z);
-			return !_voxelDataBuffer.TryGetValue(pos, out _);
+			var isTransparent = !_voxelDataBuffer.TryGetValue(pos, out _);
+			Profiler.EndSample();
+			return isTransparent;
 		}
+
+		// var pos = new Vector3Int(x, y, z);
+		// 	foreach (var entity in _filterVoxelPosition)
+		// {
+		// 	var cellPosiiton = _poolVoxelPosition.Get(entity).Value;
+		// 	var voxelType = _poolVoxelType.Get(entity).Value;
+		// 	var posiiton = new Vector3Int(cellPosiiton.x, (int) voxelType, cellPosiiton.y);
+		// 	if (pos == posiiton)
+		// 		return true;
+		// }
 
 		public int[] GetVoxelEntities(Vector2Int[] cells)
 		{
 			_entitiesBuffer.Clear();
 			_higestVoxelOnCellBuffer.Clear();
-			
-			var rawEntities = _filterVoxelPosition.GetRawEntities();
-			
-			for (int i = 0; i < rawEntities.Length; i++)
+
+			foreach (var entity in _filterVoxelPosition)
 			{
-				var entity = rawEntities[i];
 				var cellPosition = _poolVoxelPosition.Get(entity).Value;
 				var voxelType = _poolVoxelType.Get(entity).Value;
 				foreach (var cell in cells)
