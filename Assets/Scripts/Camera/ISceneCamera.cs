@@ -6,7 +6,7 @@ namespace Core.Camera
 	{
 		float Size { get; set; }
 
-		Vector2 Position { get; set; }
+		Vector3 Position { get; set; }
 
 		void Translate(Vector2 translation);
 	}

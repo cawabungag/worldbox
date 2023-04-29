@@ -45,9 +45,7 @@ namespace ECS.Systems
 					voxelTypePool.Add(voxelEntity).Value = tileType;
 
 					for (int y = 0; y < (byte)tileType; y++)
-					{
 						_mapService.AddVoxel(new VoxelData(new Vector3Int(x, y, z), tileType, cellPosiiton));
-					}
 				}
 			}
 

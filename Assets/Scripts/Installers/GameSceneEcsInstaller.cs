@@ -20,6 +20,7 @@ namespace Installers
 
 			var inputEcsWorld = new EcsWorld();
 			Container.BindInstance(inputEcsWorld).WithId(WorldUtils.INPUT_WORLD_NAME);
+			inputEcsWorld.NewEntity();
 			
 			Container.BindInterfacesTo<EcsBootstrap>().AsSingle().NonLazy();
 			Container.Bind<IEcsSystem>().To<GenerateMapSystem>().AsSingle();
@@ -30,6 +31,7 @@ namespace Installers
 				.WithInitialSize(16)
 				.FromComponentInNewPrefab(_chunkView)
 				.UnderTransformGroup("Chunks");
+			
 		}
 	}
 }

@@ -20,9 +20,10 @@ namespace Tools
 		public void Use(Vector3 worldTouchPoint, BrushType brushType, int brushSize)
 		{
 			var brush = _brushesData.GetBrush(brushType, brushSize);
-			_mapService.GetVoxelEntities(new Vector2Int((int) worldTouchPoint.x, (int) worldTouchPoint.z), brush);
+			var entities = _mapService.GetVoxelEntities(new Vector2Int((int) worldTouchPoint.x, (int) worldTouchPoint.z), brush);
+			Use(entities);
 		}
 
-		protected abstract void Use();
+		protected abstract void Use(int[] entities);
 	}
 }

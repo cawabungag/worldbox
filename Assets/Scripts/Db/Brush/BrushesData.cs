@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Db.Brush
 {
+	[CreateAssetMenu(fileName = "BrushesData", menuName = "Data/BrushesData")]
 	public class BrushesData : ScriptableObject
 	{
 		[SerializeField]

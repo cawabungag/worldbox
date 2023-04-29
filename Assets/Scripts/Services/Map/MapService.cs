@@ -83,7 +83,8 @@ namespace Services.Map
 
 		public Rect GetMapRect()
 		{
-			return new Rect(Vector2.zero, new Vector2(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE));
+			var mapRect = new Rect(Vector2.zero, new Vector2(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE));
+			return mapRect;
 		}
 
 		private Vector2Int[] ConvertToCells(Vector2Int inputPoint, Brush brush)

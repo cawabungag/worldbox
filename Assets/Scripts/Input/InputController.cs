@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Camera;
+using Db.Brush;
 using DefaultNamespace.Components.Input;
 using DefaultNamespace.Utils;
 using Leopotam.EcsLite;
-using Services.Map;
+using Tools;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -15,7 +16,6 @@ public class InputController : IInitializable, IDisposable
 {
 	private readonly EcsWorld _input;
 	private readonly ISceneCamera _camera;
-	private readonly IMapService _mapService;
 	private readonly InputView _inputView;
 	private readonly CompositeDisposable _disposables = new();
 	private readonly Dictionary<int, TouchEvent> _touchEvents = new();
@@ -27,15 +27,16 @@ public class InputController : IInitializable, IDisposable
 
 	private EcsPool<InputDrawPositionComponent> _poolDrawPosiiton;
 	private EcsPool<InputToolComponent> _poolInputTool;
+	private EcsFilter _filterTool;
+	private Dictionary<ToolType, IUseToolStrategy> _useToolStrategies;
 
 	public InputController([Inject(Id = WorldUtils.INPUT_WORLD_NAME)] EcsWorld input,
 		ISceneCamera camera,
-		IMapService mapService,
-		InputView inputView)
+		InputView inputView, IUseToolStrategy[] toolStrategies)
 	{
+		_useToolStrategies = toolStrategies.ToDictionary(x => x.ToolType);
 		_input = input;
 		_camera = camera;
-		_mapService = mapService;
 		_inputView = inputView;
 	}
 
@@ -43,6 +44,7 @@ public class InputController : IInitializable, IDisposable
 	{
 		_poolDrawPosiiton = _input.GetPool<InputDrawPositionComponent>();
 		_poolInputTool = _input.GetPool<InputToolComponent>();
+		_filterTool = _input.Filter<InputToolComponent>().End();
 
 		_inputView.Down.Subscribe(OnDown).AddTo(_disposables);
 		_inputView.Drag.Subscribe(OnDrag).AddTo(_disposables);
@@ -50,7 +52,6 @@ public class InputController : IInitializable, IDisposable
 		Observable.EveryLateUpdate().Subscribe(OnLateUpdate).AddTo(_disposables);
 	}
 
-	public void Dispose() => _disposables.Dispose();
 
 	private void OnDown(PointerEventData eventData)
 		=> _touchEvents[eventData.pointerId] = new TouchEvent(ToushState.Begin, eventData);
@@ -100,26 +101,27 @@ public class InputController : IInitializable, IDisposable
 	{
 		var touchEvent = _touchEvents.Values.First();
 
-		// if (_poolInputTool.get)
-		// _input.ReplaceDrawPosition(touchEvent.Data.position);
-		// else
-		// {
-		var touch = _touchEvents.Values.First();
-		switch (touch.TouchState)
+		if (_filterTool.GetEntitiesCount() > 0)
 		{
-			case ToushState.Begin:
-				_previousWorldTouchCenter = GetWorldPosition(touch.Data.position);
-				Debug.LogError($"Set _previousWorldTouchCenter: {_previousWorldTouchCenter}");
-				break;
-			case ToushState.Drag:
-				DragCamera(touch.Data.position);
-				break;
-			case ToushState.End:
-				break;
-			default:
-				throw new ArgumentOutOfRangeException();
+			var entity = _filterTool.GetRawEntities()[0];
+			_poolDrawPosiiton.Add(entity).Value = touchEvent.Data.position;
+			_useToolStrategies[_poolInputTool.Get(entity).Value].Use(touchEvent.Data.position, BrushType.Square, 0);
 		}
-		// }
+		else
+		{
+			var touch = _touchEvents.Values.First();
+			switch (touch.TouchState)
+			{
+				case ToushState.Begin:
+					_previousWorldTouchCenter = GetWorldPosition(touch.Data.position);
+					break;
+				case ToushState.Drag:
+					DragCamera(touch);
+					break;
+				case ToushState.End:
+					break;
+			}
+		}
 	}
 
 	private void ProcessTwoTouches()
@@ -146,7 +148,7 @@ public class InputController : IInitializable, IDisposable
 		if (firstTouch.TouchState != ToushState.Drag || secondTouch.TouchState != ToushState.Drag)
 			return;
 
-		DragCamera(touchCenter);
+		DragCamera(firstTouch);
 
 		var sizeModify = _inputView.GetZoomSensitivity(_camera.Size);
 		var cameraScalingSpeed = touchDistance.sqrMagnitude > _previousTouchDistance.sqrMagnitude
@@ -157,27 +159,21 @@ public class InputController : IInitializable, IDisposable
 		_previousTouchDistance = touchDistance;
 	}
 
-	private void DragCamera(Vector2 touchCenter)
+	private void DragCamera(TouchEvent touchEvent)
 	{
-		Debug.LogError($"{touchCenter}");
-		var worldTouchPosition = GetWorldPosition(touchCenter);
+		if (touchEvent.Data.delta.sqrMagnitude < Mathf.Epsilon)
+			return;
 
-		var positionDifference = worldTouchPosition - _previousWorldTouchCenter;
-		Debug.LogError($"Set worldTouchPosition: {_previousWorldTouchCenter} delta: {positionDifference}");
-
-		_camera.Translate(positionDifference);
-		var position = _camera.Position;
-		var mapRect = _mapService.GetMapRect();
-		position.x = Mathf.Clamp(position.x, mapRect.xMin, mapRect.xMax);
-		position.y = Mathf.Clamp(position.y, mapRect.yMin, mapRect.yMax);
-		_camera.Position = position;
+		_camera.Translate(touchEvent.Data.delta);
 	}
 
 	private Vector2 GetWorldPosition(Vector3 pos)
 	{
-		Debug.LogError($"Screen point: {pos}");
-		return _camera.ScreenToWordPoint(pos);
+		var screenToWordPoint = _camera.ScreenToWordPoint(pos);
+		return new Vector2(screenToWordPoint.x, screenToWordPoint.z);
 	}
+
+	public void Dispose() => _disposables.Dispose();
 
 	private enum ToushState
 	{
@@ -200,11 +196,5 @@ public class InputController : IInitializable, IDisposable
 		}
 
 		public void Process() => IsProcessed = true;
-	}
-
-	private enum TouchType
-	{
-		Single,
-		Double
 	}
 }

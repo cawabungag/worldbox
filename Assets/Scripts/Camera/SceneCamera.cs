@@ -1,4 +1,5 @@
 using System;
+using DefaultNamespace.Utils;
 using UnityEngine;
 
 namespace Core.Camera.Impl
@@ -8,6 +9,8 @@ namespace Core.Camera.Impl
 		[SerializeField]
 		private UnityEngine.Camera _camera;
 
+		[SerializeField]
+		private float _cameraSpeed;
 
 		private float _size;
 
@@ -24,21 +27,28 @@ namespace Core.Camera.Impl
 			}
 		}
 
-		public Vector2 Position
+		public Vector3 Position
 		{
 			get => transform.position;
-			set
-			{
-				var position = transform.position;
-				position.x = value.x;
-				position.y = value.y;
-				transform.position = position;
-			}
+			set => transform.position = value;
 		}
 
-		public Vector3 ScreenToWordPoint(Vector3 screenPos) => _camera.ScreenToWorldPoint(screenPos);
+		public Vector3 ScreenToWordPoint(Vector3 screenPos)
+		{
+			screenPos.z = 0.1f;
+			return _camera.ScreenToWorldPoint(screenPos);
+		}
 
-		public void Translate(Vector2 translation) => transform.Translate(-translation);
+		public void Translate(Vector2 translation)
+		{
+			var positionY = Position.y;
+			var moveVector = new Vector3(translation.x, 0, translation.y);
+			moveVector.Normalize();
+			var newPosiiton = Position - moveVector * _cameraSpeed;
+			newPosiiton.x = Mathf.Clamp(newPosiiton.x, -WorldUtils.WORLD_SIZE / 2, WorldUtils.WORLD_SIZE / 2);
+			newPosiiton.z = Mathf.Clamp(newPosiiton.z, -WorldUtils.WORLD_SIZE / 2, WorldUtils.WORLD_SIZE / 2);
+			Position = new Vector3(newPosiiton.x, positionY, newPosiiton.z);
+		}
 
 		private void Awake()
 		{
