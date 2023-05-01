@@ -5,8 +5,8 @@ using UnityEngine;
 
 public static class ArrayUtils
 {
-	public static void AddOrCreateValue(this Dictionary<Vector4Int, List<Vector3>> dictionary,
-		Vector4Int newKey,
+	public static void AddOrCreateValue(this Dictionary<int, List<Vector3>> dictionary,
+		int newKey,
 		Vector3 newValue,
 		List<Vector3> buffer = null)
 	{
@@ -27,8 +27,8 @@ public static class ArrayUtils
 		}
 	}
 
-	public static void AddOrCreateValue(this Dictionary<Vector4Int, List<Vector2>> dictionary,
-		Vector4Int newKey,
+	public static void AddOrCreateValue(this Dictionary<int, List<Vector2>> dictionary,
+		int newKey,
 		Vector2 newValue,
 		List<Vector2> buffer = null)
 	{
@@ -49,8 +49,8 @@ public static class ArrayUtils
 		}
 	}
 
-	public static void AddOrCreateValue(this Dictionary<Vector4Int, List<int>> dictionary,
-		Vector4Int newKey,
+	public static void AddOrCreateValue(this Dictionary<int, List<int>> dictionary,
+		int newKey,
 		int newValue,
 		List<int> buffer = null)
 	{

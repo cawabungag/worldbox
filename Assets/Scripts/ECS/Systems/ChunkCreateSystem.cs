@@ -48,7 +48,9 @@ namespace ECS.Systems
 					var chunkEntity = world.NewEntity();
 					var chunk = new Vector4(startCoord.x, startCoord.y, nextCoord.x, nextCoord.y);
 					poolChunkComponent.Add(chunkEntity).Value = chunk;
-					poolChunkViewComponent.Add(chunkEntity).Value = _poolChunks.Spawn();
+					var chunkView = _poolChunks.Spawn();
+					chunkView.gameObject.name = $"Chunk: {chunk}";
+					poolChunkViewComponent.Add(chunkEntity).Value = chunkView;
 					var sliceBoard = splitArray.Slice(startCoord.x, startCoord.y, nextCoord.x, nextCoord.y);
 					poolNeedUpdateChunk.Add(chunkEntity).Value = false;
 

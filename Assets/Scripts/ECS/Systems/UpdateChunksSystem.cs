@@ -15,23 +15,22 @@ namespace ECS.Systems
 		private EcsWorld _world;
 		private EcsPool<NeedUpdateChunkComponent> _poolNeedUpdateChunk;
 		private EcsPool<ChunkViewCompoenent> _poolChunkView;
-		private EcsPool<ChunkComponent> _poolChunkBound;
 		private EcsPool<VoxelTypeComponent> _poolVoxelType;
 		private EcsPool<VoxelPositionComponent> _poolVoxelPosition;
 		private EcsPool<VoxelsInChunkComponent> _poolVoxelsInChunk;
 		private EcsFilter _filterNeedUpdateChunk;
 
-		private readonly Dictionary<Vector4Int, List<Vector2>> _textures =
+		private readonly Dictionary<int, List<Vector2>> _textures =
 			new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
-		private readonly Dictionary<Vector4Int, List<Vector3>> _vertices =
+		private readonly Dictionary<int, List<Vector3>> _vertices =
 			new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
-		private readonly Dictionary<Vector4Int, List<int>> _triangles = new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
+		private readonly Dictionary<int, List<int>> _triangles = new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
 
 		private readonly List<Vector2> _texturesBuffer = new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
 		private readonly List<Vector3> _verticesBuffer = new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
 		private readonly List<int> _triangleBuffer = new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
 
-		private Dictionary<Vector4Int, int> _faceCount = new();
+		private Dictionary<int, int> _faceCount = new();
 
 		public UpdateChunksSystem(IMapService mapService)
 			=> _mapService = mapService;
@@ -41,7 +40,6 @@ namespace ECS.Systems
 			_world = systems.GetWorld();
 			_poolNeedUpdateChunk = _world.GetPool<NeedUpdateChunkComponent>();
 			_poolChunkView = _world.GetPool<ChunkViewCompoenent>();
-			_poolChunkBound = _world.GetPool<ChunkComponent>();
 			_poolVoxelType = _world.GetPool<VoxelTypeComponent>();
 			_poolVoxelPosition = _world.GetPool<VoxelPositionComponent>();
 			_poolVoxelsInChunk = _world.GetPool<VoxelsInChunkComponent>();
@@ -68,10 +66,8 @@ namespace ECS.Systems
 				if (!isNeedUpdate)
 					continue;
 
-				var chunkBound = _poolChunkBound.Get(entity).Value;
-
-				if (!_faceCount.TryGetValue(chunkBound, out _))
-					_faceCount.Add(chunkBound, 0);
+				if (!_faceCount.TryGetValue(entity, out _))
+					_faceCount.Add(entity, 0);
 
 				var voxelEntities = _poolVoxelsInChunk.Get(entity).Value;
 				foreach (var voxelEntity in voxelEntities)
@@ -83,37 +79,31 @@ namespace ECS.Systems
 					{
 						var x = position.x;
 						var z = position.y;
-						CreateVoxelGeometry(new Vector3Int(x, y, z), y.ToVoxelType(), chunkBound);
+						CreateVoxelGeometry(new Vector3Int(x, y, z), y.ToVoxelType(), entity);
 					}
 				}
 
-				_poolNeedUpdateChunk.Get(entity).Value = false;
-			}
-
-			foreach (var entity in _filterNeedUpdateChunk)
-			{
-				var chunkBound = _poolChunkBound.Get(entity).Value;
-				if (!_faceCount.TryGetValue(chunkBound, out _))
-					continue;
-
 				var chunkView = _poolChunkView.Get(entity).Value;
-				var chunk = _poolChunkBound.Get(entity).Value;
+				Debug.LogError($"chunkView: {chunkView.gameObject.name}");
+				var meshVertices = _vertices[entity].ToArray();
+				var meshTriangles = _triangles[entity].ToArray();
+				var meshUV = _textures[entity].ToArray();
 
 				var mesh = new Mesh();
 				mesh.indexFormat = IndexFormat.UInt32;
-				_vertices[chunk].CopyTo(mesh.vertices);
-				_triangles[chunk].CopyTo(mesh.triangles);
-				_textures[chunk].CopyTo(mesh.uv);
+				mesh.vertices = meshVertices;
+				mesh.triangles = meshTriangles;
+				mesh.uv = meshUV;
 
 				mesh.RecalculateNormals();
 				mesh.Optimize();
-				var meshFilterMesh = chunkView.MeshFilter.mesh;
-				meshFilterMesh.Clear();
 				chunkView.MeshFilter.mesh = mesh;
+
+				_poolNeedUpdateChunk.Get(entity).Value = false;
 			}
 		}
 
-		private void CreateVoxelGeometry(Vector3Int position, VoxelType voxelType, Vector4Int chunkBounds)
+		private void CreateVoxelGeometry(Vector3Int position, VoxelType voxelType, int chunkId)
 		{
 			var x = position.x;
 			var y = position.y;
@@ -122,163 +112,163 @@ namespace ECS.Systems
 			// Front
 			if (_mapService.IsTransparent(x, y, z + 1))
 			{
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z + 1), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z + 1), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z + 1), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y + 1, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y + 1, z + 1), _verticesBuffer);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 1, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 3, _triangleBuffer);
 
-				AddTexture(voxelType, chunkBounds);
-				_faceCount[chunkBounds] += 1;
+				AddTexture(voxelType, chunkId);
+				_faceCount[chunkId] += 1;
 			}
 
 			// Back
 			if (_mapService.IsTransparent(x, y, z - 1))
 			{
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y + 1, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y + 1, z), _verticesBuffer);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 1, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 3, _triangleBuffer);
 
-				AddTexture(voxelType, chunkBounds);
-				_faceCount[chunkBounds] += 1;
+				AddTexture(voxelType, chunkId);
+				_faceCount[chunkId] += 1;
 			}
 
 			// Top
 			if (_mapService.IsTransparent(x, y + 1, z))
 			{
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z + 1), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y + 1, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y + 1, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y + 1, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y + 1, z + 1), _verticesBuffer);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 1, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 3, _triangleBuffer);
 
-				AddTexture(voxelType, chunkBounds);
-				_faceCount[chunkBounds] += 1;
+				AddTexture(voxelType, chunkId);
+				_faceCount[chunkId] += 1;
 			}
 
 			// Bottom
 			if (_mapService.IsTransparent(x, y - 1, z))
 			{
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z + 1), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y, z + 1), _verticesBuffer);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 1, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 3, _triangleBuffer);
 
-				AddTexture(voxelType, chunkBounds);
-				_faceCount[chunkBounds] += 1;
+				AddTexture(voxelType, chunkId);
+				_faceCount[chunkId] += 1;
 			}
 
 			// Left
 			if (_mapService.IsTransparent(x - 1, y, z))
 			{
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y, z + 1), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z + 1), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x, y + 1, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y + 1, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x, y + 1, z), _verticesBuffer);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 1, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 3, _triangleBuffer);
 
-				AddTexture(voxelType, chunkBounds);
-				_faceCount[chunkBounds] += 1;
+				AddTexture(voxelType, chunkId);
+				_faceCount[chunkId] += 1;
 			}
 
 			// Right
 			if (_mapService.IsTransparent(x + 1, y, z))
 			{
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z + 1), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y, z), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z), _verticesBuffer);
-				_vertices.AddOrCreateValue(chunkBounds, new Vector3(x + 1, y + 1, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y, z + 1), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y + 1, z), _verticesBuffer);
+				_vertices.AddOrCreateValue(chunkId, new Vector3(x + 1, y + 1, z + 1), _verticesBuffer);
 
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 1, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 2, _triangleBuffer);
-				_triangles.AddOrCreateValue(chunkBounds, _faceCount[chunkBounds] * 4 + 3, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 1, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 2, _triangleBuffer);
+				_triangles.AddOrCreateValue(chunkId, _faceCount[chunkId] * 4 + 3, _triangleBuffer);
 
-				AddTexture(voxelType, chunkBounds);
-				_faceCount[chunkBounds] += 1;
+				AddTexture(voxelType, chunkId);
+				_faceCount[chunkId] += 1;
 			}
 		}
 
-		private void AddTexture(VoxelType textureIndex, Vector4Int chunkBounds)
+		private void AddTexture(VoxelType textureIndex, int chunkId)
 		{
 			switch (textureIndex)
 			{
 				case VoxelType.GroundWater:
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundA, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundb, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundc, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundd, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.groundA, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.groundb, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.groundc, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.groundd, _texturesBuffer);
 					break;
 				case VoxelType.Water:
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.waterA, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.waterb, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.waterc, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.waterd, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.waterA, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.waterb, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.waterc, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.waterd, _texturesBuffer);
 					break;
 				case VoxelType.Sand:
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.sandA, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.sandb, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.sandc, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.sandd, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.sandA, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.sandb, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.sandc, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.sandd, _texturesBuffer);
 					break;
 				case VoxelType.Plain:
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.grassA, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.grassb, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.grassc, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.grassd, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.grassA, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.grassb, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.grassc, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.grassd, _texturesBuffer);
 					break;
 				case VoxelType.Forest:
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.forestA, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.forestb, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.forestc, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.forestd, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.forestA, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.forestb, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.forestc, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.forestd, _texturesBuffer);
 					break;
 				case VoxelType.Rock:
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.stoneA, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.stoneb, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.stonec, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.stoned, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.stoneA, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.stoneb, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.stonec, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.stoned, _texturesBuffer);
 					break;
 				default:
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundA, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundb, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundc, _texturesBuffer);
-					_textures.AddOrCreateValue(chunkBounds, VoxelUVUtils.groundd, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.groundA, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.groundb, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.groundc, _texturesBuffer);
+					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.groundd, _texturesBuffer);
 					break;
 			}
 		}

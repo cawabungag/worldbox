@@ -38,10 +38,8 @@ namespace Services.Map
 
 		public bool IsTransparent(int x, int y, int z)
 		{
-			Profiler.BeginSample("IsTransparent");
 			var pos = new Vector3Int(x, y, z);
 			var isTransparent = !_voxelDataBuffer.TryGetValue(pos, out _);
-			Profiler.EndSample();
 			return isTransparent;
 		}
 
@@ -57,6 +55,7 @@ namespace Services.Map
 
 		public int[] GetVoxelEntities(Vector2Int[] cells)
 		{
+			Profiler.BeginSample("GetVoxelEntities");
 			_entitiesBuffer.Clear();
 			_higestVoxelOnCellBuffer.Clear();
 
@@ -85,6 +84,8 @@ namespace Services.Map
 			{
 				_entitiesBuffer.Add(tuple.Value.entity);
 			}
+
+			Profiler.EndSample();
 
 			return _entitiesBuffer.ToArray();
 		}

@@ -1,9 +1,9 @@
-using DefaultNamespace.Utils;
+using UnityEngine;
 
 namespace ECS.Components.Map
 {
 	public struct ChunkComponent
 	{
-		public Vector4Int Value;
+		public Vector4 Value;
 	}
 }
