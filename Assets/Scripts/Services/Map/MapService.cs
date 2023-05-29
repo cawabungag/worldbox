@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using Db.Brush;
-using DefaultNamespace.Utils;
 using ECS.Components.Map;
-using Game.Services.MapGenerator;
 using Leopotam.EcsLite;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -13,25 +11,22 @@ namespace Services.Map
 	{
 		private readonly List<int> _entitiesBuffer = new();
 		private readonly Dictionary<Vector3Int, VoxelData> _voxelDataBuffer = new();
-		private readonly Dictionary<Vector2Int, (VoxelType voxelType, int entity)> _higestVoxelOnCellBuffer = new();
 
 		private EcsPool<VoxelPositionComponent> _poolVoxelPosition;
-		private EcsPool<VoxelTypeComponent> _poolVoxelType;
-		private EcsFilter _filterVoxelPosition;
+		private EcsFilter _filterChunks;
+		private EcsPool<ChunkComponent> _poolChunks;
+		private EcsPool<VoxelsInChunkComponent> _poolVoxelsInChunk;
+		private Rect _mapRect;
 
 		public MapService(EcsWorld world)
 		{
 			_poolVoxelPosition = world.GetPool<VoxelPositionComponent>();
-			_poolVoxelType = world.GetPool<VoxelTypeComponent>();
-			_filterVoxelPosition = world.Filter<VoxelPositionComponent>().End();
+			_filterChunks = world.Filter<ChunkComponent>().End();
+			_poolChunks = world.GetPool<ChunkComponent>();
+			_poolVoxelsInChunk = world.GetPool<VoxelsInChunkComponent>();
 		}
 
 		public void AddVoxel(VoxelData voxelData)
-		{
-			_voxelDataBuffer.Add(voxelData.Position, voxelData);
-		}
-
-		public void UpdateVoxel(VoxelData voxelData)
 		{
 			_voxelDataBuffer.Add(voxelData.Position, voxelData);
 		}
@@ -43,51 +38,40 @@ namespace Services.Map
 			return isTransparent;
 		}
 
-		// var pos = new Vector3Int(x, y, z);
-		// 	foreach (var entity in _filterVoxelPosition)
-		// {
-		// 	var cellPosiiton = _poolVoxelPosition.Get(entity).Value;
-		// 	var voxelType = _poolVoxelType.Get(entity).Value;
-		// 	var posiiton = new Vector3Int(cellPosiiton.x, (int) voxelType, cellPosiiton.y);
-		// 	if (pos == posiiton)
-		// 		return true;
-		// }
-
 		public int[] GetVoxelEntities(Vector2Int[] cells)
 		{
 			Profiler.BeginSample("GetVoxelEntities");
 			_entitiesBuffer.Clear();
-			_higestVoxelOnCellBuffer.Clear();
 
-			foreach (var entity in _filterVoxelPosition)
+			foreach (var inputCell in cells)
 			{
-				var cellPosition = _poolVoxelPosition.Get(entity).Value;
-				var voxelType = _poolVoxelType.Get(entity).Value;
-				foreach (var cell in cells)
+				foreach (var chunk in _filterChunks)
 				{
-					if (cellPosition == cell)
+					var bound = _poolChunks.Get(chunk).Value;
+					if (inputCell.x > bound.x
+						&& inputCell.y > bound.y
+						&& inputCell.x < bound.z
+						&& inputCell.y < bound.w)
 					{
-						if (_higestVoxelOnCellBuffer.TryGetValue(cellPosition, out var maxVoxelTypeInBuffer))
+						var voxelsInChunk = _poolVoxelsInChunk.Get(chunk).Value;
+						foreach (var voxel in voxelsInChunk)
 						{
-							if (voxelType > maxVoxelTypeInBuffer.Item1)
-								_higestVoxelOnCellBuffer[cellPosition] = (voxelType, entity);
-						}
-						else
-						{
-							_higestVoxelOnCellBuffer.Add(cellPosition, (voxelType, entity));
+							var cellPosition = _poolVoxelPosition.Get(voxel).Value;
+							foreach (var cell in cells)
+							{
+								if (cellPosition != cell)
+									continue;
+
+								_entitiesBuffer.Add(voxel);
+							}
 						}
 					}
 				}
 			}
 
-			foreach (var tuple in _higestVoxelOnCellBuffer)
-			{
-				_entitiesBuffer.Add(tuple.Value.entity);
-			}
-
+			var voxelEntities = _entitiesBuffer.ToArray();
 			Profiler.EndSample();
-
-			return _entitiesBuffer.ToArray();
+			return voxelEntities;
 		}
 
 		public int[] GetVoxelEntities(Vector2Int inputPoint, Brush brush)
@@ -99,12 +83,12 @@ namespace Services.Map
 
 		public Rect GetMapRect()
 		{
-			var mapRect = new Rect(Vector2.zero, new Vector2(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE));
-			return mapRect;
+			throw new System.NotImplementedException();
 		}
 
 		private Vector2Int[] ConvertToCells(Vector2Int inputPoint, Brush brush)
 		{
+			Profiler.BeginSample("ConvertToCells");
 			var list = new List<Vector2Int>();
 			var startX = inputPoint.x - brush.Width / 2;
 			var startY = inputPoint.y + brush.Height / 2;
@@ -116,30 +100,19 @@ namespace Services.Map
 					if (!brush.GetPoint(x, y))
 						continue;
 
+					if (expr)
+					{
+						
+					}
+
 					var tilePosition = new Vector2Int(startX + x, startY - y);
-					var hasCell = HasCell(tilePosition);
-
-					if (!hasCell)
-						continue;
-
 					list.Add(tilePosition);
 				}
 			}
 
-			return list.ToArray();
-		}
-
-		private bool HasCell(Vector2Int tilePosition)
-		{
-			foreach (var item in _poolVoxelPosition.GetRawDenseItems())
-			{
-				if (item.Value == tilePosition)
-				{
-					return true;
-				}
-			}
-
-			return false;
+			var convertToCells = list.ToArray();
+			Profiler.EndSample();
+			return convertToCells;
 		}
 	}
 }

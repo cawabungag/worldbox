@@ -1,3 +1,4 @@
+using System.Linq;
 using Db.Brush;
 using Services.Map;
 using UnityEngine;
@@ -21,7 +22,7 @@ namespace Tools
 		{
 			var brush = _brushesData.GetBrush(brushType, brushSize);
 			var entities = _mapService.GetVoxelEntities(new Vector2Int((int) worldTouchPoint.x, (int) worldTouchPoint.z), brush);
-			if (entities.Length == 0)
+			if (!entities.Any())
 				return;
 			
 			Debug.LogError($"worldTouchPoint: {worldTouchPoint}");

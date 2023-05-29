@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
@@ -23,10 +24,6 @@ namespace ECS.Systems
 		private readonly Dictionary<int, List<Vector2>> _textures = new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
 		private readonly Dictionary<int, List<Vector3>> _vertices = new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
 		private readonly Dictionary<int, List<int>> _triangles = new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
-
-		// private readonly List<Vector2> _texturesBuffer = new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
-		// private readonly List<Vector3> _verticesBuffer = new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
-		// private readonly List<int> _triangleBuffer = new(WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE);
 
 		private Dictionary<int, int> _faceCount = new();
 
@@ -54,8 +51,12 @@ namespace ECS.Systems
 			_textures.Clear();
 			_faceCount.Clear();
 
+			var allChunkStamp = DateTimeOffset.Now.Millisecond;
+
 			foreach (var entity in _filterNeedUpdateChunk)
 			{
+				var stamp = DateTimeOffset.Now.Millisecond;
+
 				var isNeedUpdate = _poolNeedUpdateChunk.Get(entity).Value;
 				if (!isNeedUpdate)
 					continue;
@@ -78,7 +79,9 @@ namespace ECS.Systems
 				}
 
 				var chunkView = _poolChunkView.Get(entity).Value;
-				Debug.LogError($"chunkView: {chunkView.gameObject.name}");
+				Debug.LogError($"chunkView: {chunkView.gameObject.name}"
+								+ $" _filterNeedUpdateChunk: {_filterNeedUpdateChunk.GetEntitiesCount()} "
+								+ $" time: {DateTimeOffset.Now.Millisecond - stamp}");
 				var meshVertices = _vertices[entity].ToArray();
 				var meshTriangles = _triangles[entity].ToArray();
 				var meshUV = _textures[entity].ToArray();
@@ -95,6 +98,8 @@ namespace ECS.Systems
 
 				_poolNeedUpdateChunk.Get(entity).Value = false;
 			}
+			
+			Debug.LogError($"all chunks time: {DateTimeOffset.Now.Millisecond - allChunkStamp}");
 		}
 
 		private void CreateVoxelGeometry(Vector3Int position, VoxelType voxelType, int chunkId)

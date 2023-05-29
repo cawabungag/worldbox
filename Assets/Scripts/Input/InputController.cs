@@ -153,7 +153,8 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 	private Vector2 GetWorldPosition(Vector3 pos)
 	{
 		var screenToWordPoint = _camera.ScreenToWordPoint(pos);
-		return new Vector2(screenToWordPoint.x, screenToWordPoint.z);
+		var worldPosition = new Vector2(screenToWordPoint.x, screenToWordPoint.z);
+		return worldPosition;
 	}
 
 	public void Dispose() => _disposables.Dispose();
