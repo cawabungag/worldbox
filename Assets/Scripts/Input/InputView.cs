@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 
 public class InputView : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
+	//TODO Move to some settings
 	[SerializeField]
 	private float _minCameraSize;
 	public float MinCameraSize => _minCameraSize;
