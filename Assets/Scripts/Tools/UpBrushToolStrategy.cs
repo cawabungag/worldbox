@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Db.Brush;
 using ECS.Components.Map;
 using Game.Services.MapGenerator;
@@ -23,7 +24,7 @@ namespace Tools
 			_poolNeedUpdateChunk = world.GetPool<NeedUpdateChunkComponent>();
 		}
 
-		protected override void Use(int[] entities)
+		protected override void Use(List<int> entities)
 		{
 			foreach (var entity in entities)
 			{

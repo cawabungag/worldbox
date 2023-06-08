@@ -2,7 +2,6 @@ using DefaultNamespace.Utils;
 using ECS.Components.Map;
 using Game.Services.MapGenerator;
 using Leopotam.EcsLite;
-using Services.Map;
 using UnityEngine;
 
 namespace ECS.Systems
@@ -10,12 +9,10 @@ namespace ECS.Systems
 	public class GenerateMapSystem : IEcsInitSystem
 	{
 		private readonly IMapGenerator _mapGenerator;
-		private readonly IMapService _mapService;
 
-		public GenerateMapSystem(IMapGenerator mapGenerator, IMapService mapService)
+		public GenerateMapSystem(IMapGenerator mapGenerator)
 		{
 			_mapGenerator = mapGenerator;
-			_mapService = mapService;
 		}
 
 		public void Init(IEcsSystems systems)

@@ -83,6 +83,16 @@ namespace ECS.Systems
 				mesh.RecalculateNormals();
 				mesh.Optimize();
 				chunkView.MeshFilter.mesh = mesh;
+
+				if (chunkView.TryGetComponent<MeshCollider>(out var collider))
+				{
+					collider.sharedMesh = mesh;
+				}
+				else
+				{
+					var meshCollider = chunkView.gameObject.AddComponent<MeshCollider>();
+					meshCollider.sharedMesh = mesh;
+				}
 			}
 
 			var timestamp2 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();

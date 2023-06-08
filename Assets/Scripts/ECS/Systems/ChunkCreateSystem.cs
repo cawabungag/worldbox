@@ -12,10 +12,7 @@ namespace ECS.Systems
 		private readonly ChunkView.Pool _poolChunks;
 		private readonly List<int> _voxelEntitiesBuffer = new();
 
-		public ChunkCreateSystem(ChunkView.Pool poolChunks)
-		{
-			_poolChunks = poolChunks;
-		}
+		public ChunkCreateSystem(ChunkView.Pool poolChunks) => _poolChunks = poolChunks;
 
 		public void Init(IEcsSystems systems)
 		{

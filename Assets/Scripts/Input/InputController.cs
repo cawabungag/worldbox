@@ -81,7 +81,8 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 			else
 				_poolDrawPosiiton.Get(entity).Value = touchPoint;
 
-			_useToolStrategies[toolType].Use(GetWorldPosition(touchPoint), BrushType.Square, 16);
+			var worldTouchPoint = GetWorldPosition();
+			_useToolStrategies[toolType].Use(worldTouchPoint, BrushType.Square, 16);
 		}
 		else
 		{
@@ -89,7 +90,7 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 			switch (touch.TouchState)
 			{
 				case ToushState.Begin:
-					_previousWorldTouchCenter = GetWorldPosition(touch.Data.position);
+					_previousWorldTouchCenter = GetWorldPosition();
 					break;
 				case ToushState.Drag:
 					DragCamera(touch);
@@ -124,7 +125,7 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 		if (firstTouch.TouchState == ToushState.Begin || secondTouch.TouchState == ToushState.Begin)
 		{
 			_previousTouchDistance = touchDistance;
-			_previousWorldTouchCenter = GetWorldPosition(touchCenter);
+			_previousWorldTouchCenter = GetWorldPosition();
 			return;
 		}
 
@@ -150,11 +151,21 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 		_camera.Translate(touchEvent.Data.delta);
 	}
 
-	private Vector2 GetWorldPosition(Vector3 pos)
+	//TODO: Need refactoring
+	private Vector2 GetWorldPosition()
 	{
-		var screenToWordPoint = _camera.ScreenToWordPoint(pos);
-		var worldPosition = new Vector2(screenToWordPoint.x, screenToWordPoint.z);
-		return worldPosition;
+		Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+		if (Physics.Raycast (ray, out var hit, 100)) {
+			Debug.Log ($"hit: {hit.transform.name}");
+			var m = Matrix4x4.TRS(new Vector3(WorldUtils.WORLD_SIZE / 2, 0, WorldUtils.WORLD_SIZE / 2), Quaternion.identity, Vector3.one);
+			var multiplyPoint3X4 = m.MultiplyPoint3x4(hit.point);
+			var asd = new Vector3(multiplyPoint3X4.z, 0, multiplyPoint3X4.x);
+			var xz = asd.ToXZ();
+			Debug.LogError($"martix point : {xz}");
+			return xz;
+		}
+		
+		return Vector2.zero;
 	}
 
 	public void Dispose() => _disposables.Dispose();
