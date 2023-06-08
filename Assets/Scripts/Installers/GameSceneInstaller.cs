@@ -36,7 +36,15 @@ namespace Installers
 				.AsSingle().NonLazy();
 			Container.Bind<IMapGenerator>().To<MapGenerator>().AsSingle();
 			Container.Bind<IMapService>().To<MapService>().AsSingle();
+
 			Container.Bind<IUseToolStrategy>().To<UpBrushToolStrategy>().AsSingle();
+			Container.Bind<IUseToolStrategy>().To<DownBrushToolStrategy>().AsSingle();
+			Container.Bind<IUseToolStrategy>().To<ForestStrategy>().AsSingle();
+			Container.Bind<IUseToolStrategy>().To<GroundWaterStrategy>().AsSingle();
+			Container.Bind<IUseToolStrategy>().To<PlainStrategy>().AsSingle();
+			Container.Bind<IUseToolStrategy>().To<RockStrategy>().AsSingle();
+			Container.Bind<IUseToolStrategy>().To<SandStrategy>().AsSingle();
+			Container.Bind<IUseToolStrategy>().To<WaterStrategy>().AsSingle();
 		}
 	}
 }

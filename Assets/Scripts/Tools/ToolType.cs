@@ -5,5 +5,11 @@ namespace Tools
 		None,
 		Up,
 		Down,
+		GroundWater,
+		Water,
+		Sand,
+		Plain,
+		Forest,
+		Rock
 	}
 }

@@ -45,11 +45,15 @@ namespace UI.Presenters
 			ref var toolType = ref _poolInputTool.Get(_filterTool.GetRawEntities()[0]).Value;
 			if (toggleToolType == toolType)
 			{
-				if (isOn) toolType = ToolType.None;
+				if (isOn) 
+					toolType = ToolType.None;
+				
+				Debug.LogError(toolType);
 				return;
 			}
 
 			toolType = toggleToolType;
+			Debug.LogError(toolType);
 		}
 	}
 }
