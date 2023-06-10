@@ -9,5 +9,6 @@ namespace Db.Tools
 	{
 		public ToolType ToolType;
 		public Sprite Sprite;
+		public bool IsBrushTool;
 	}
 }

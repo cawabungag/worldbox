@@ -13,6 +13,30 @@ MonoBehaviour:
   m_Name: BrushesData
   m_EditorClassIdentifier: 
   _brushDatas:
-  - BrushType: 0
+  - BrushType: 1
     Size: 16
     BrushSprite: {fileID: 21300000, guid: 4143b5b6a9e514df78fc0aa6827d4432, type: 3}
+  - BrushType: 1
+    Size: 32
+    BrushSprite: {fileID: 21300000, guid: 7a69848ec4f9c4f018fc49c4f2dd20e8, type: 3}
+  - BrushType: 1
+    Size: 64
+    BrushSprite: {fileID: 21300000, guid: 9414b93f1d8e74bb2a68ab91ef159a69, type: 3}
+  - BrushType: 2
+    Size: 16
+    BrushSprite: {fileID: 21300000, guid: 644455aa8ad2a476489c9e33320112f6, type: 3}
+  - BrushType: 2
+    Size: 32
+    BrushSprite: {fileID: 21300000, guid: f42b3992a9e1640dfa7801828c22a3d2, type: 3}
+  - BrushType: 2
+    Size: 64
+    BrushSprite: {fileID: 21300000, guid: 91cacc5821ac64a16aa57559d1b9615e, type: 3}
+  - BrushType: 3
+    Size: 16
+    BrushSprite: {fileID: 21300000, guid: a29f66761dac445eda0389cab1c45c14, type: 3}
+  - BrushType: 3
+    Size: 16
+    BrushSprite: {fileID: 21300000, guid: 82ea93397770b418b8010537dc1cab5f, type: 3}
+  - BrushType: 3
+    Size: 16
+    BrushSprite: {fileID: 21300000, guid: b6eccd3a198c34167be6517cc183104c, type: 3}

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Db.Brush;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
@@ -51,14 +50,14 @@ namespace Services.Map
 				foreach (var chunk in _filterChunks)
 				{
 					var bound = _poolChunks.Get(chunk).Value;
-					if (!IsInBound(inputCell, bound)) 
+					if (!IsInBound(inputCell, bound))
 						continue;
-					
+
 					var voxelsInChunk = _poolVoxelsInChunk.Get(chunk).Value;
 					foreach (var voxel in voxelsInChunk)
 					{
 						var cellPosition = _poolVoxelPosition.Get(voxel).Value;
-						if (cellPosition == fixedPos) 
+						if (cellPosition == fixedPos)
 							_entitiesBuffer.Add(voxel);
 					}
 				}
@@ -79,6 +78,30 @@ namespace Services.Map
 			var cells = ConvertToCells(inputPoint, brush);
 			var entities = GetVoxelEntities(cells);
 			return entities;
+		}
+
+		public int GetVoxelEntity(Vector2Int inputPoint)
+		{
+			//TODO Need refactoring position
+			var cellPos = inputPoint - new Vector2Int(WorldUtils.WORLD_SIZE / 2, WorldUtils.WORLD_SIZE / 2);
+			var fixedPos = new Vector2Int(cellPos.y, cellPos.x);
+
+			foreach (var chunk in _filterChunks)
+			{
+				var bound = _poolChunks.Get(chunk).Value;
+				if (!IsInBound(inputPoint, bound))
+					continue;
+
+				var voxelsInChunk = _poolVoxelsInChunk.Get(chunk).Value;
+				foreach (var voxel in voxelsInChunk)
+				{
+					var cellPosition = _poolVoxelPosition.Get(voxel).Value;
+					if (cellPosition == fixedPos)
+						return voxel;
+				}
+			}
+
+			return -1;
 		}
 
 		private List<Vector2Int> ConvertToCells(Vector2Int inputPoint, Brush brush)

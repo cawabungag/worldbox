@@ -10,14 +10,14 @@ using Zenject;
 
 namespace UI.Presenters
 {
-	public class GameHudPresenter : BasePresenter<GameHudView>, IInitializable
+	public class UiToolHudPresenter : BasePresenter<UiToolHudView>, IInitializable
 	{
 		private readonly ToolsData _toolsData;
 		private readonly EcsPool<InputToolComponent> _poolInputTool;
 		private readonly EcsFilter _filterTool;
 		public override bool IsPopUp => false;
 
-		public GameHudPresenter(GameHudView view,
+		public UiToolHudPresenter(UiToolHudView view,
 			ToolsData toolsData,
 			[Inject(Id = WorldUtils.INPUT_WORLD_NAME)]
 			EcsWorld inputWorld) : base(view)
@@ -32,7 +32,7 @@ namespace UI.Presenters
 			var tools = _toolsData.GetTools();
 			foreach (var tool in tools)
 			{
-				var toolElement = Object.Instantiate(View.ToolElementView, View.ToolsElementsTarget);
+				var toolElement = Object.Instantiate(View.UiToolElementView, View.ToolsElementsTarget);
 				toolElement.Toggle.isOn = false;
 				toolElement.IconImage.sprite = tool.Sprite;
 				toolElement.Toggle.group = View.ToggleGroup;

@@ -59,6 +59,7 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 	{
 		if (!_touchEvents.ContainsKey(eventData.pointerId))
 			return;
+		
 		_touchEvents[eventData.pointerId] = new TouchEvent(ToushState.Drag, eventData);
 	}
 
@@ -66,6 +67,7 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 	{
 		if (!_touchEvents.ContainsKey(eventData.pointerId))
 			return;
+		
 		_touchEvents[eventData.pointerId] = new TouchEvent(ToushState.End, eventData);
 	}
 
@@ -82,7 +84,9 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 				_poolDrawPosiiton.Get(entity).Value = touchPoint;
 
 			var worldTouchPoint = GetWorldPosition();
-			_useToolStrategies[toolType].Use(worldTouchPoint, BrushType.Square, 16);
+			var brushType = _input.GetUnique<InputBrushTypeComponent>().Value;
+			var brushSize = _input.GetUnique<InputBrushSizeComponent>().Value;
+			_useToolStrategies[toolType].Use(worldTouchPoint, brushType, brushSize);
 		}
 		else
 		{

@@ -20,9 +20,21 @@ namespace Tools
 		
 		public void Use(Vector3 worldTouchPoint, BrushType brushType, int brushSize)
 		{
-			var brush = _brushesData.GetBrush(brushType, brushSize);
 			//TODO Refactoring convert posiiton
-			var entities = _mapService.GetVoxelEntities(new Vector2Int((int) worldTouchPoint.x, (int) worldTouchPoint.y), brush);
+			var inputPoint = new Vector2Int((int) worldTouchPoint.x, (int) worldTouchPoint.y);
+			
+			if (brushType == BrushType.None || brushSize == 0)
+			{
+				var entity = _mapService.GetVoxelEntity(inputPoint);
+				if (entity == -1)
+					return;
+				
+				Use(new List<int> {entity});
+				return;
+			}
+			
+			var brush = _brushesData.GetBrush(brushType, brushSize);
+			var entities = _mapService.GetVoxelEntities(inputPoint, brush);
 			if (entities.Count == 0)
 				return;
 			

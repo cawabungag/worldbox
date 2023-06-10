@@ -3,11 +3,10 @@ using UnityEngine.UI;
 
 namespace UI.Views
 {
-	public class ToolElementView : MonoBehaviour
+	public class UiToolElementView : MonoBehaviour
 	{
 		[SerializeField]
 		private Image _iconImage;
-
 		[SerializeField]
 		private Toggle _toggle;
 		

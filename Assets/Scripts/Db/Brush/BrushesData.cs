@@ -10,19 +10,7 @@ namespace Db.Brush
 		[SerializeField]
 		private List<BrushData> _brushDatas;
 
-		public BrushData GetBrushData(BrushType brushType, int size)
-		{
-			foreach (var brushData in _brushDatas)
-			{
-				if (brushData.BrushType == brushType && brushData.Size == size)
-				{
-					return brushData;
-				}
-			}
-
-			throw new InvalidOperationException();
-		}
-
+		public List<BrushData> GetBrushes() => _brushDatas;
 		public Brush GetBrush(BrushType brushType, int size)
 		{
 			var brush = GetBrushData(brushType, size);
@@ -38,6 +26,19 @@ namespace Db.Brush
 			}
 
 			return new Brush(texture.height, texture.width, points);
+		}
+		
+		private BrushData GetBrushData(BrushType brushType, int size)
+		{
+			foreach (var brushData in _brushDatas)
+			{
+				if (brushData.BrushType == brushType && brushData.Size == size)
+				{
+					return brushData;
+				}
+			}
+
+			throw new InvalidOperationException();
 		}
 	}
 

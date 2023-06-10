@@ -4,11 +4,11 @@ using UnityEngine.UI;
 
 namespace UI.Views
 {
-	public class GameHudView : BaseView
+	public class UiToolHudView : BaseView
 	{
 		[SerializeField]
-		private ToolElementView _toolElementView;
-		public ToolElementView ToolElementView => _toolElementView;
+		private UiToolElementView _uiToolElementView;
+		public UiToolElementView UiToolElementView => _uiToolElementView;
 
 		[SerializeField]
 		private RectTransform _toolsElementsTarget;

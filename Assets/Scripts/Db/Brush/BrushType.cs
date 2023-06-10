@@ -2,6 +2,9 @@ namespace Db.Brush
 {
 	public enum BrushType
 	{
-		Square
+		None,
+		Square,
+		Circle,
+		Rhombus
 	}
 }

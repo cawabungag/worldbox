@@ -9,11 +9,15 @@ namespace Installers
 	public class GameSceneUiInstaller : MonoInstaller
 	{
 		[SerializeField]
-		private GameHudView _gameHudView;
+		private UiToolHudView _uiToolHudView;
+		
+		[SerializeField]
+		private UiBrushHudView _uiBrushHudView;
 		
 		public override void InstallBindings()
 		{
-			Container.BindUi<GameHudPresenter, GameHudView>(_gameHudView);
+			Container.BindUi<UiToolHudPresenter, UiToolHudView>(_uiToolHudView);
+			Container.BindUi<UiBrushHudPresenter, UiBrushHudView>(_uiBrushHudView);
 		}
 	}
 }
