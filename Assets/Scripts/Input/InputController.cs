@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Camera;
-using Db.Brush;
 using DefaultNamespace.Components.Input;
 using DefaultNamespace.Utils;
 using Leopotam.EcsLite;
@@ -59,7 +58,7 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 	{
 		if (!_touchEvents.ContainsKey(eventData.pointerId))
 			return;
-		
+
 		_touchEvents[eventData.pointerId] = new TouchEvent(ToushState.Drag, eventData);
 	}
 
@@ -67,7 +66,7 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 	{
 		if (!_touchEvents.ContainsKey(eventData.pointerId))
 			return;
-		
+
 		_touchEvents[eventData.pointerId] = new TouchEvent(ToushState.End, eventData);
 	}
 
@@ -86,7 +85,8 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 			var worldTouchPoint = GetWorldPosition();
 			var brushType = _input.GetUnique<InputBrushTypeComponent>().Value;
 			var brushSize = _input.GetUnique<InputBrushSizeComponent>().Value;
-			_useToolStrategies[toolType].Use(worldTouchPoint, brushType, brushSize);
+			var isBrushTool = _input.GetUnique<InputIsBrushToolComponent>().Value;
+			_useToolStrategies[toolType].Use(worldTouchPoint, brushType, brushSize, isBrushTool);
 		}
 		else
 		{
@@ -158,17 +158,17 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 	//TODO: Need refactoring
 	private Vector2 GetWorldPosition()
 	{
-		Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-		if (Physics.Raycast (ray, out var hit, 100)) {
-			Debug.Log ($"hit: {hit.transform.name}");
-			var m = Matrix4x4.TRS(new Vector3(WorldUtils.WORLD_SIZE / 2, 0, WorldUtils.WORLD_SIZE / 2), Quaternion.identity, Vector3.one);
+		var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		if (Physics.Raycast(ray, out var hit, 100))
+		{
+			var m = Matrix4x4.TRS(new Vector3(WorldUtils.WORLD_SIZE / 2, 0, WorldUtils.WORLD_SIZE / 2),
+				Quaternion.identity, Vector3.one);
 			var multiplyPoint3X4 = m.MultiplyPoint3x4(hit.point);
 			var asd = new Vector3(multiplyPoint3X4.z, 0, multiplyPoint3X4.x);
 			var xz = asd.ToXZ();
-			Debug.LogError($"martix point : {xz}");
 			return xz;
 		}
-		
+
 		return Vector2.zero;
 	}
 

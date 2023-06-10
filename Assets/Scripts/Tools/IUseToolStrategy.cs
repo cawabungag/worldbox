@@ -6,6 +6,6 @@ namespace Tools
 	public interface IUseToolStrategy
 	{
 		ToolType ToolType { get; }
-		void Use(Vector3 worldTouchPoint, BrushType brushType, int brushSize);
+		void Use(Vector3 worldTouchPoint, BrushType brushType, int brushSize, bool isBrushTool);
 	}
 }

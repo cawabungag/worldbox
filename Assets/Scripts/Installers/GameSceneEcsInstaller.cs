@@ -32,9 +32,11 @@ namespace Installers
 			Container.BindInstance(inputEcsWorld).WithId(WorldUtils.INPUT_WORLD_NAME);
 			var newEntity = inputEcsWorld.NewEntity();
 			
+			//TODO Move to Init system
 			inputEcsWorld.GetPool<InputToolComponent>().Add(newEntity).Value = ToolType.None;
 			inputEcsWorld.GetPool<InputBrushSizeComponent>().Add(newEntity).Value = InputUtils.DEFAULT_BRUSH_SIZE;
 			inputEcsWorld.GetPool<InputBrushTypeComponent>().Add(newEntity).Value = InputUtils.DEFAULT_BRUSH_TYPE;
+			inputEcsWorld.GetPool<InputIsBrushToolComponent>().Add(newEntity).Value = false;
 
 			Container.BindInterfacesAndSelfTo<EcsBootstrap>().AsSingle().NonLazy();
 			Container.Bind<IEcsSystem>().To<GenerateMapSystem>().AsSingle();

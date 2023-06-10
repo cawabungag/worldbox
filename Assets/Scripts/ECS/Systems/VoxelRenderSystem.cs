@@ -80,8 +80,6 @@ namespace ECS.Systems
 				mesh.triangles = meshTriangles;
 				mesh.uv = meshUV;
 
-				mesh.RecalculateNormals();
-				mesh.Optimize();
 				chunkView.MeshFilter.mesh = mesh;
 
 				if (chunkView.TryGetComponent<MeshCollider>(out var collider))

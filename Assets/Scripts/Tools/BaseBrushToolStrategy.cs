@@ -18,7 +18,7 @@ namespace Tools
 			_brushesData = brushesData;
 		}
 		
-		public void Use(Vector3 worldTouchPoint, BrushType brushType, int brushSize)
+		public void Use(Vector3 worldTouchPoint, BrushType brushType, int brushSize, bool isBrushTool)
 		{
 			//TODO Refactoring convert posiiton
 			var inputPoint = new Vector2Int((int) worldTouchPoint.x, (int) worldTouchPoint.y);
