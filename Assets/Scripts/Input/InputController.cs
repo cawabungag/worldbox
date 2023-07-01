@@ -9,6 +9,7 @@ using Tools;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Profiling;
 using Zenject;
 
 public class InputController : IInitializable, IDisposable, ILateTickable
@@ -19,6 +20,7 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 	private readonly CompositeDisposable _disposables = new();
 	private readonly Dictionary<int, TouchEvent> _touchEvents = new();
 	private readonly List<int> _eventsToRemove = new();
+	private readonly RaycastHit[] _raycastHitsBuffer = new RaycastHit[5];
 	private float _startDistanceCamera;
 
 	private Vector2 _previousTouchDistance;
@@ -158,12 +160,17 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 	//TODO: Need refactoring
 	private Vector2 GetWorldPosition()
 	{
-		var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-		if (Physics.Raycast(ray, out var hit, 100))
+		var camera = Camera.main;
+		var ray = camera.ScreenPointToRay(Input.mousePosition);
+		var hits = Physics.RaycastNonAlloc(ray, _raycastHitsBuffer, Mathf.Infinity);
+		if (hits == 0)
+			return Vector2.zero;
+		
+		foreach (var raycastHit in _raycastHitsBuffer)
 		{
 			var m = Matrix4x4.TRS(new Vector3(WorldUtils.WORLD_SIZE / 2, 0, WorldUtils.WORLD_SIZE / 2),
 				Quaternion.identity, Vector3.one);
-			var multiplyPoint3X4 = m.MultiplyPoint3x4(hit.point);
+			var multiplyPoint3X4 = m.MultiplyPoint3x4(raycastHit.point);
 			var asd = new Vector3(multiplyPoint3X4.z, 0, multiplyPoint3X4.x);
 			var xz = asd.ToXZ();
 			return xz;
@@ -199,6 +206,7 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 
 	public void LateTick()
 	{
+		Profiler.BeginSample($"InputController.LateTick");
 		if (_touchEvents.Values.All(t => t.IsProcessed))
 			return;
 
@@ -222,5 +230,6 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 		}
 
 		_eventsToRemove.Clear();
+		Profiler.EndSample();
 	}
 }

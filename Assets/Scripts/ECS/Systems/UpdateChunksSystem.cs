@@ -7,6 +7,7 @@ using Game.Services.MapGenerator;
 using Leopotam.EcsLite;
 using Services.Map;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
 namespace ECS.Systems
@@ -64,7 +65,7 @@ namespace ECS.Systems
 
 		public void Run(IEcsSystems systems)
 		{
-			// Profiler.BeginSample("UpdateChunksSystem");
+			Profiler.BeginSample("UpdateChunksSystem");
 			foreach (var entity in _filterNeedUpdateChunk)
 			{
 				_vertices.Clear();
@@ -118,7 +119,7 @@ namespace ECS.Systems
 				_poolNeedUpdateChunk.Get(entity).Value = false;
 			}
 
-			// Profiler.EndSample();
+			Profiler.EndSample();
 		}
 
 		private void CreateVoxelGeometry(Vector3Int position, VoxelType voxelType, int chunkId)
