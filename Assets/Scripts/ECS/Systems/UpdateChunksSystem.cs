@@ -82,7 +82,7 @@ namespace ECS.Systems
 				
 				_lastBufferIndex = 0;
 
-				var isNeedUpdate = _poolNeedUpdateChunk.Get(entity).Value;
+				ref var isNeedUpdate = ref _poolNeedUpdateChunk.Get(entity).Value;
 				if (!isNeedUpdate)
 					continue;
 
@@ -104,8 +104,9 @@ namespace ECS.Systems
 				}
 
 				var chunkView = _poolChunkView.Get(entity).Value;
-				var mesh = new Mesh();
-				mesh.indexFormat = IndexFormat.UInt32;
+				var mesh = chunkView.MeshFilter.mesh;
+				mesh.Clear();
+				mesh.indexFormat = IndexFormat.UInt16;
 				
 				var newVertices = _vertices[entity];
 				var newTriangles = _triangles[entity];
@@ -114,9 +115,7 @@ namespace ECS.Systems
 				mesh.SetVertices(newVertices);
 				mesh.SetTriangles(newTriangles, 0);
 				mesh.SetUVs(0, newTextures);
-				chunkView.MeshFilter.mesh = mesh;
-				
-				_poolNeedUpdateChunk.Get(entity).Value = false;
+				isNeedUpdate = false;
 			}
 
 			Profiler.EndSample();
@@ -124,6 +123,8 @@ namespace ECS.Systems
 
 		private void CreateVoxelGeometry(Vector3Int position, VoxelType voxelType, int chunkId)
 		{
+			Profiler.BeginSample("CreateVoxelGeometry");
+
 			var x = position.x;
 			var y = position.y;
 			var z = position.z;
@@ -246,10 +247,14 @@ namespace ECS.Systems
 				AddTexture(voxelType, chunkId, texturesBuffer);
 				_faceCount[chunkId] += 1;
 			}
+			
+			Profiler.EndSample();
 		}
 
 		private void AddTexture(VoxelType textureIndex, int chunkId, List<Vector2> texturesBuffer)
 		{
+			Profiler.BeginSample("AddTexture");
+
 			switch (textureIndex)
 			{
 				case VoxelType.GroundWater:
@@ -295,6 +300,8 @@ namespace ECS.Systems
 					_textures.AddOrCreateValue(chunkId, VoxelUVUtils.groundd, texturesBuffer);
 					break;
 			}
+			
+			Profiler.EndSample();
 		}
 	}
 }

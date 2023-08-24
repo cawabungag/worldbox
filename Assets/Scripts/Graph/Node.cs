@@ -1,13 +1,13 @@
-using System.Collections.Generic;
+using UnityEngine;
 
-public class Node<T>
+public class Node
 {
-	public T Value { get; set; }
-	public List<Node<T>> Neighbors { get; set; }
+	public int Entity;
+	public Vector2Int Position;
 
-	public Node(T value)
+	public Node(Vector2Int pos, int entity)
 	{
-		Value = value;
-		Neighbors = new List<Node<T>>();
+		Position = pos;
+		Entity = entity;
 	}
 }

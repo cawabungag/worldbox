@@ -19,9 +19,11 @@ namespace Services.Map
 		private EcsPool<VoxelsInChunkComponent> _poolVoxelsInChunk;
 		private Rect _mapRect;
 		private List<Vector2Int> _cellsBuffer = new();
+		private EcsWorld _world;
 
 		public MapService(EcsWorld world)
 		{
+			_world = world;
 			_poolVoxelPosition = world.GetPool<VoxelPositionComponent>();
 			_filterChunks = world.Filter<ChunkComponent>().End();
 			_poolChunks = world.GetPool<ChunkComponent>();
@@ -31,39 +33,51 @@ namespace Services.Map
 
 		public bool IsTransparent(int x, int y, int z)
 		{
+			Profiler.BeginSample("IsTransparent");
 			var pos = new Vector3Int(x, y, z);
 			var isTransparent = !_voxelDataBuffer.TryGetValue(pos, out _);
+			Profiler.EndSample();
 			return isTransparent;
 		}
 
 		private List<int> GetVoxelEntities(List<Vector2Int> cells)
 		{
+			var gridGraph = _world.GetUnique<MapGraphComponent>().Value;
 			Profiler.BeginSample("GetVoxelEntities");
 			_entitiesBuffer.Clear();
 
 			foreach (var inputCell in cells)
 			{
-				//TODO Need refactoring position
+				var halfWidth = WorldUtils.WORLD_SIZE / 2;
+				var halfHeight = WorldUtils.WORLD_SIZE / 2;
 				var cellPos = inputCell - new Vector2Int(WorldUtils.WORLD_SIZE / 2, WorldUtils.WORLD_SIZE / 2);
 				var fixedPos = new Vector2Int(cellPos.y, cellPos.x);
-
-				foreach (var chunk in _filterChunks)
-				{
-					var bound = _poolChunks.Get(chunk).Value;
-					if (!IsInBound(inputCell, bound))
-						continue;
-
-					var voxelsInChunk = _poolVoxelsInChunk.Get(chunk).Value;
-					foreach (var voxel in voxelsInChunk)
-					{
-						var cellPosition = _poolVoxelPosition.Get(voxel).Value;
-						if (cellPosition == fixedPos)
-							_entitiesBuffer.Add(voxel);
-					}
-				}
+				var entity = gridGraph.GetEntity(fixedPos.x + halfWidth, fixedPos.y + halfHeight);
+				_entitiesBuffer.Add(entity);
 			}
 
-			Profiler.EndSample();
+			// foreach (var inputCell in cells)
+			// {
+			// 	//TODO Need refactoring position
+			// 	var cellPos = inputCell - new Vector2Int(WorldUtils.WORLD_SIZE / 2, WorldUtils.WORLD_SIZE / 2);
+			// 	var fixedPos = new Vector2Int(cellPos.y, cellPos.x);
+			//
+			// 	foreach (var chunk in _filterChunks)
+			// 	{
+			// 		var bound = _poolChunks.Get(chunk).Value;
+			// 		if (!IsInBound(inputCell, bound))
+			// 			continue;
+			//
+			// 		var voxelsInChunk = _poolVoxelsInChunk.Get(chunk).Value;
+			// 		foreach (var voxel in voxelsInChunk)
+			// 		{
+			// 			var cellPosition = _poolVoxelPosition.Get(voxel).Value;
+			// 			if (cellPosition == fixedPos)
+			// 				_entitiesBuffer.Add(voxel);
+			// 		}
+			// 	}
+			// }
+
 			return _entitiesBuffer;
 		}
 

@@ -1,4 +1,3 @@
-using Db.Brush;
 using DefaultNamespace;
 using DefaultNamespace.Chunk;
 using DefaultNamespace.Components.Input;
@@ -18,6 +17,8 @@ namespace Installers
 
 		public override void InstallBindings()
 		{
+			Application.targetFrameRate = 60;
+			
 			var config = new EcsWorld.Config
 			{
 				Entities = WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE + WorldUtils.CHUNK_SIZE,
