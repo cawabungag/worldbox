@@ -56,28 +56,6 @@ namespace Services.Map
 				_entitiesBuffer.Add(entity);
 			}
 
-			// foreach (var inputCell in cells)
-			// {
-			// 	//TODO Need refactoring position
-			// 	var cellPos = inputCell - new Vector2Int(WorldUtils.WORLD_SIZE / 2, WorldUtils.WORLD_SIZE / 2);
-			// 	var fixedPos = new Vector2Int(cellPos.y, cellPos.x);
-			//
-			// 	foreach (var chunk in _filterChunks)
-			// 	{
-			// 		var bound = _poolChunks.Get(chunk).Value;
-			// 		if (!IsInBound(inputCell, bound))
-			// 			continue;
-			//
-			// 		var voxelsInChunk = _poolVoxelsInChunk.Get(chunk).Value;
-			// 		foreach (var voxel in voxelsInChunk)
-			// 		{
-			// 			var cellPosition = _poolVoxelPosition.Get(voxel).Value;
-			// 			if (cellPosition == fixedPos)
-			// 				_entitiesBuffer.Add(voxel);
-			// 		}
-			// 	}
-			// }
-
 			return _entitiesBuffer;
 		}
 
