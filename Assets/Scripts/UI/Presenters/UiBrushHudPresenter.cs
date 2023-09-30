@@ -69,12 +69,6 @@ namespace UI.Presenters
 			View.ShowBrushPanel.gameObject.SetActive(!isShow);
 			View.HideBrushPanel.gameObject.SetActive(isShow);
 			View.BrushesTarget.gameObject.SetActive(isShow);
-
-			// if (isShow) 
-			// 	return;
-			//
-			// _input.GetUniqueRef<InputBrushTypeComponent>().Value = InputUtils.DEFAULT_BRUSH_TYPE;
-			// _input.GetUniqueRef<InputBrushSizeComponent>().Value = InputUtils.DEFAULT_BRUSH_SIZE;
 		}
 
 		private void OnChangeBrush(bool isOn, BrushType brushType, int brushSize)
