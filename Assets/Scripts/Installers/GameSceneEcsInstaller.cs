@@ -1,9 +1,13 @@
+using System.Collections.Generic;
+using Db.Plant;
 using DefaultNamespace;
 using DefaultNamespace.Chunk;
 using DefaultNamespace.Components.Input;
+using DefaultNamespace.Systems.Plant;
 using DefaultNamespace.Utils;
 using ECS.Systems;
 using Leopotam.EcsLite;
+using Plant;
 using Tools;
 using UnityEngine;
 using Zenject;
@@ -14,6 +18,9 @@ namespace Installers
 	{
 		[SerializeField]
 		private ChunkView _chunkView;
+
+		[SerializeField]
+		private PlantsData _plantsData;
 
 		public override void InstallBindings()
 		{
@@ -28,6 +35,8 @@ namespace Installers
 			
 			var ecsWorld = new EcsWorld(config);
 			Container.BindInstance(ecsWorld);
+
+			Container.BindInstance(_plantsData);
 
 			var inputEcsWorld = new EcsWorld();
 			Container.BindInstance(inputEcsWorld).WithId(WorldUtils.INPUT_WORLD_NAME);
@@ -44,11 +53,31 @@ namespace Installers
 			Container.Bind<IEcsSystem>().To<ChunkCreateSystem>().AsSingle();
 			Container.Bind<IEcsSystem>().To<VoxelRenderSystem>().AsSingle();
 			Container.Bind<IEcsSystem>().To<UpdateChunksSystem>().AsSingle();
+			
+			Container.Bind<IEcsSystem>().To<CreatePlantSystem>().AsSingle();
 
 			Container.BindMemoryPool<ChunkView, ChunkView.Pool>()
 				.WithInitialSize(16)
 				.FromComponentInNewPrefab(_chunkView)
 				.UnderTransformGroup("Chunks");
+
+			var plantsData = _plantsData.GetPlantsData();
+			if (plantsData.Count != 0) 
+				SetupPlantsPool(plantsData);
+			
+		}
+
+		private void SetupPlantsPool(List<PlantData> plantsData)
+		{
+			foreach (var plantData in plantsData)
+			{
+				Container.BindMemoryPool<PlantView, PlantView.Pool>()
+					.WithInitialSize(plantData.ChunkSize)
+					.FromComponentInNewPrefabResource(plantData.PrefabPath)
+					.UnderTransformGroup(plantData.PrefabPath)
+					.AsCached()
+					.WithConcreteId(plantData.PrefabPath);
+			}
 		}
 	}
 }

@@ -3,6 +3,8 @@ namespace Tools
 	public enum ToolType
 	{
 		None,
+		
+		//Terrain
 		Up,
 		Down,
 		GroundWater,
@@ -10,6 +12,11 @@ namespace Tools
 		Sand,
 		Plain,
 		Forest,
-		Rock
+		Rock,
+		
+		//Plant
+		Palm,
+		Tree,
+		Cactus
 	}
 }

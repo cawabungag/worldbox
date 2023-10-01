@@ -7,6 +7,8 @@ using Game.Services.MapGenerator;
 using Game.Services.MapGenerator.Impls;
 using Services.Map;
 using Tools;
+using Tools.Plant;
+using Tools.Strategies.Plant;
 using UnityEngine;
 using Zenject;
 
@@ -45,6 +47,9 @@ namespace Installers
 			Container.Bind<IUseToolStrategy>().To<RockStrategy>().AsSingle();
 			Container.Bind<IUseToolStrategy>().To<SandStrategy>().AsSingle();
 			Container.Bind<IUseToolStrategy>().To<WaterStrategy>().AsSingle();
+			Container.Bind<IUseToolStrategy>().To<PalmToolStrategy>().AsSingle();
+			Container.Bind<IUseToolStrategy>().To<TreeToolStategy>().AsSingle();
+			Container.Bind<IUseToolStrategy>().To<CactusToolStrategy>().AsSingle();
 		}
 	}
 }

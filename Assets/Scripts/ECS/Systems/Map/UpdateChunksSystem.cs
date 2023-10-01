@@ -66,6 +66,10 @@ namespace ECS.Systems
 		public void Run(IEcsSystems systems)
 		{
 			Profiler.BeginSample("UpdateChunksSystem");
+
+			if (Time.frameCount % 3 != 0)
+				return;
+			
 			foreach (var entity in _filterNeedUpdateChunk)
 			{
 				_vertices.Clear();

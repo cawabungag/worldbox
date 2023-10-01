@@ -1,8 +1,5 @@
-using System;
-
 namespace Game.Services.MapGenerator
 {
-	[Flags]
 	public enum VoxelType : byte
 	{
 		None = 0,

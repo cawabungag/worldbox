@@ -15,17 +15,34 @@ MonoBehaviour:
   _toolDatas:
   - ToolType: 1
     Sprite: {fileID: 21300000, guid: da69ddd59a629441fa65a186a19dbaeb, type: 3}
+    IsBrushTool: 0
   - ToolType: 2
     Sprite: {fileID: 21300000, guid: 9408f4db96fec462eb5da448077302b7, type: 3}
+    IsBrushTool: 0
   - ToolType: 3
     Sprite: {fileID: 21300000, guid: 865fd5215b78645b2a5b9381d6d65af7, type: 3}
+    IsBrushTool: 0
   - ToolType: 4
     Sprite: {fileID: 21300000, guid: 865fd5215b78645b2a5b9381d6d65af7, type: 3}
+    IsBrushTool: 0
   - ToolType: 5
     Sprite: {fileID: 21300000, guid: 651b8667083004e7eac469305656a4a9, type: 3}
+    IsBrushTool: 0
   - ToolType: 6
     Sprite: {fileID: 21300000, guid: ded3d532870b54b4eb637f0ce698bf6f, type: 3}
+    IsBrushTool: 0
   - ToolType: 7
     Sprite: {fileID: 21300000, guid: 01742df6a172c486090a16cd6fa0ad8b, type: 3}
+    IsBrushTool: 0
   - ToolType: 8
     Sprite: {fileID: 21300000, guid: cae8409a9260244979e8583d2e96209b, type: 3}
+    IsBrushTool: 0
+  - ToolType: 9
+    Sprite: {fileID: 21300000, guid: e08a6047c2d5343cbb31ef2dd8e55a31, type: 3}
+    IsBrushTool: 0
+  - ToolType: 11
+    Sprite: {fileID: 21300000, guid: 469bb37eb400b4047b9b0db6f8f9cf5f, type: 3}
+    IsBrushTool: 0
+  - ToolType: 10
+    Sprite: {fileID: 21300000, guid: f73270fb2cc9e4f839562dd7c148d8e3, type: 3}
+    IsBrushTool: 0
