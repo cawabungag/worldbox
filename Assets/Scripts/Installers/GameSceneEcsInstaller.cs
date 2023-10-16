@@ -50,10 +50,12 @@ namespace Installers
 
 			Container.BindInterfacesAndSelfTo<EcsBootstrap>().AsSingle().NonLazy();
 			Container.Bind<IEcsSystem>().To<GenerateMapSystem>().AsSingle();
+			Container.Bind<IEcsSystem>().To<GenerateWeatherSystem>().AsSingle();
 			Container.Bind<IEcsSystem>().To<ChunkCreateSystem>().AsSingle();
 			Container.Bind<IEcsSystem>().To<VoxelRenderSystem>().AsSingle();
 			Container.Bind<IEcsSystem>().To<UpdateChunksSystem>().AsSingle();
 			
+			Container.Bind<IEcsSystem>().To<GeneratePlantSystem>().AsSingle();
 			Container.Bind<IEcsSystem>().To<CreatePlantSystem>().AsSingle();
 
 			Container.BindMemoryPool<ChunkView, ChunkView.Pool>()

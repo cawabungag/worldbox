@@ -10,7 +10,7 @@ namespace Services.Map
 {
 	public class MapService : IMapService
 	{
-		private readonly List<int> _entitiesBuffer = new();
+		private readonly List<MapNode> _entitiesBuffer = new();
 		private readonly Dictionary<Vector3Int, VoxelData> _voxelDataBuffer = new();
 
 		private EcsPool<VoxelPositionComponent> _poolVoxelPosition;
@@ -40,7 +40,7 @@ namespace Services.Map
 			return isTransparent;
 		}
 
-		private List<int> GetVoxelEntities(List<Vector2Int> cells)
+		private List<MapNode> GetVoxelEntities(List<Vector2Int> cells)
 		{
 			var gridGraph = _world.GetUnique<MapGraphComponent>().Value;
 			Profiler.BeginSample("GetVoxelEntities");
@@ -52,7 +52,7 @@ namespace Services.Map
 				var halfHeight = WorldUtils.WORLD_SIZE / 2;
 				var cellPos = inputCell - new Vector2Int(WorldUtils.WORLD_SIZE / 2, WorldUtils.WORLD_SIZE / 2);
 				var fixedPos = new Vector2Int(cellPos.y, cellPos.x);
-				var entity = gridGraph.GetEntity(fixedPos.x + halfWidth, fixedPos.y + halfHeight);
+				var entity = gridGraph.GetValue(fixedPos.x + halfWidth, fixedPos.y + halfHeight);
 				_entitiesBuffer.Add(entity);
 			}
 
@@ -65,7 +65,7 @@ namespace Services.Map
 					&& inputCell.y <= bound.w;
 		}
 
-		public List<int> GetVoxelEntities(Vector2Int inputPoint, Brush brush)
+		public List<MapNode> GetVoxelEntities(Vector2Int inputPoint, Brush brush)
 		{
 			var cells = ConvertToCells(inputPoint, brush);
 			var entities = GetVoxelEntities(cells);

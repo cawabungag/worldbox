@@ -24,10 +24,11 @@ namespace Tools
 			_poolNeedUpdateChunk = world.GetPool<NeedUpdateChunkComponent>();
 		}
 
-		protected override void Use(List<int> entities)
+		protected override void Use(List<MapNode> entities)
 		{
-			foreach (var entity in entities)
+			foreach (var mapNode in entities)
 			{
+				var entity = mapNode.Entity;
 				if (!_poolVoxelType.Has(entity)
 					|| !_poolChunkEntity.Has(entity))
 					continue;

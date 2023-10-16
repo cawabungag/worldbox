@@ -40,13 +40,14 @@ namespace DefaultNamespace.Components.Plant
 
 		protected abstract int PoolIndex { get; }
 
-		protected override void Use(List<int> entities)
+		protected override void Use(List<MapNode> entities)
 		{
 			if (entities.Count == 0)
 				return;
 
-			foreach (var entity in entities)
+			foreach (var mapNode in entities)
 			{
+				var entity = mapNode.Entity;
 				var voxel = _poolVoxelTypeCompoenent.Get(entity).Value;
 				foreach (var voxelType in _plantData.VoxelType)
 				{

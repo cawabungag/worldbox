@@ -151,8 +151,8 @@ public class IconGenerator : MonoBehaviour {
             for (int x = 0; x < overlay.width; x++)
             {
                 Color PixelColorFore = overlay.GetPixel(x, y) * overlay.GetPixel(x, y).a;
-                Color PixelColorBack = final.GetPixel((int)x + (int)offset.x, y + (int)offset.y) * (1 - PixelColorFore.a);
-                final.SetPixel((int)x + (int)offset.x, (int)y + (int)offset.y, PixelColorBack + PixelColorFore);
+                Color PixelColorBack = final.GetPixel(x + (int)offset.x, y + (int)offset.y) * (1 - PixelColorFore.a);
+                final.SetPixel(x + (int)offset.x, y + (int)offset.y, PixelColorBack + PixelColorFore);
             }
         }
 

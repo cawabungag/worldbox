@@ -2,6 +2,7 @@ using System;
 using Game.Services.MapGenerator;
 using Plant;
 using Tools;
+using UnityEngine;
 
 namespace Db.Plant
 {
@@ -13,5 +14,7 @@ namespace Db.Plant
 		public int ChunkSize;
 		public ToolType ToolType;
 		public VoxelType[] VoxelType;
+		public Vector2 RequiredTemperature;
+		public int PoolIndex;
 	}
 }

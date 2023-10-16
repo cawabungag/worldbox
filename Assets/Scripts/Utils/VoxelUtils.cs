@@ -8,8 +8,6 @@ namespace DefaultNamespace.Utils
 		{
 			switch (height)
 			{
-				case 0:
-					return VoxelType.GroundWater;
 				case 1:
 					return VoxelType.Water;
 				case 2:
@@ -25,7 +23,7 @@ namespace DefaultNamespace.Utils
 			if (height > 5)
 				return VoxelType.Rock;
 
-			return VoxelType.None;
+			return VoxelType.Water;
 		}
 	}
 }

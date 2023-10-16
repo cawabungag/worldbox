@@ -22,7 +22,7 @@ namespace ECS.Systems
 			var voxels = _mapGenerator.GenerateGround(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE);
 			var halfWidth = WorldUtils.WORLD_SIZE / 2;
 			var halfHeight = WorldUtils.WORLD_SIZE / 2;
-			var mapGraph = new GridGraph(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE);
+			var mapGraph = new GridGraph<MapNode>(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE);
 
 			for (var i = 0; i < WorldUtils.WORLD_SIZE; i++)
 			{
@@ -36,7 +36,8 @@ namespace ECS.Systems
 					var cellPosiiton = new Vector2Int(x, z);
 					voxelPositionPool.Add(voxelEntity).Value = cellPosiiton;
 					voxelTypePool.Add(voxelEntity).Value = tileType;
-					mapGraph.SetEntity(j, i, cellPosiiton, voxelEntity);
+					var mapNode = new MapNode(cellPosiiton, voxelEntity);
+					mapGraph.SetEntity(j, i, mapNode);
 				}
 			}
 

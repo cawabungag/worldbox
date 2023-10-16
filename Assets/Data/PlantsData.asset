@@ -18,13 +18,19 @@ MonoBehaviour:
     ChunkSize: 100
     ToolType: 9
     VoxelType: 03
+    RequiredTemperature: {x: 20, y: 25}
+    PoolIndex: 0
   - Type: 0
     PrefabPath: Tree
     ChunkSize: 100
     ToolType: 10
     VoxelType: 0507
+    RequiredTemperature: {x: 10, y: 15}
+    PoolIndex: 1
   - Type: 2
     PrefabPath: Cactus
     ChunkSize: 100
     ToolType: 11
     VoxelType: 03
+    RequiredTemperature: {x: 25, y: 30}
+    PoolIndex: 2

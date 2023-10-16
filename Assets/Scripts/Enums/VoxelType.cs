@@ -2,12 +2,11 @@ namespace Game.Services.MapGenerator
 {
 	public enum VoxelType : byte
 	{
-		None = 0,
-		GroundWater = 1,
-		Water = 2,
-		Sand = 3,
-		Plain = 5,
-		Forest = 7,
-		Rock = 8,
+		GroundWater = 0,
+		Water = 1,
+		Sand = 2,
+		Plain = 3,
+		Forest = 4,
+		Rock = 5,
 	}
 }
