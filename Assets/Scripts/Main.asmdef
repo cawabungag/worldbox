@@ -4,6 +4,13 @@
     "Zenject",
     "Leopotam.EcsLite",
     "Unity.TextMeshPro",
-    "UniRx"
+    "UniRx",
+    "Unity.Entities",
+    "Unity.Mathematics",
+    "Unity.Transforms",
+    "Unity.Burst",
+    "Unity.Collections",
+    "Unity.Entities.Hybrid",
+    "Unity.Entities.Graphics"
   ]
 }
