@@ -66,7 +66,6 @@ namespace Installers
 			var plantsData = _plantsData.GetPlantsData();
 			if (plantsData.Count != 0) 
 				SetupPlantsPool(plantsData);
-			
 		}
 
 		private void SetupPlantsPool(List<PlantData> plantsData)
