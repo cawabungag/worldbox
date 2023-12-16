@@ -55,7 +55,7 @@ namespace DefaultNamespace.Components.Plant
 						continue;
 
 					var position = _poolVoxelPosition.Get(entity).Value;
-					var plantPosition = new Vector3(position.x, (int) voxel, position.y);
+					var plantPosition = new Vector3Int(position.x, (int) voxel, position.y);
 					var newPlantEntity = _world.NewEntity();
 					_poolPlantPosiiton.Add(newPlantEntity).Value = plantPosition;
 					_poolPlantTypeComponent.Add(newPlantEntity).Value = _plantData.Type;

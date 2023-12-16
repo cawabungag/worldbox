@@ -1,3 +1,6 @@
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using DefaultNamespace.Systems.Save;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
 using Game.Services.MapGenerator;
@@ -18,11 +21,32 @@ namespace ECS.Systems
 			var world = systems.GetWorld();
 			var voxelPositionPool = world.GetPool<VoxelPositionComponent>();
 			var voxelTypePool = world.GetPool<VoxelTypeComponent>();
-
-			var voxels = _mapGenerator.GenerateGround(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE);
+			
 			var halfWidth = WorldUtils.WORLD_SIZE / 2;
 			var halfHeight = WorldUtils.WORLD_SIZE / 2;
 			var mapGraph = new GridGraph<MapNode>(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE);
+			
+			if (File.Exists(Application.persistentDataPath + "/save.bin"))
+			{
+				var formatter = new BinaryFormatter();
+				Stream readStream = new FileStream(Application.persistentDataPath + "/save.bin", FileMode.Open, FileAccess.Read, FileShare.Read);
+				var saveData = (SaveData) formatter.Deserialize(readStream);
+				var voxelsSaveData = saveData.VoxelsSaveData;
+				foreach (var componentData in voxelsSaveData)
+				{
+					var voxelEntity = world.NewEntity();
+					var cellPosiiton = new Vector2Int(componentData.Key.X, componentData.Key.Y);
+					voxelPositionPool.Add(voxelEntity).Value = cellPosiiton;
+					voxelTypePool.Add(voxelEntity).Value = componentData.Value;
+					var mapNode = new MapNode(cellPosiiton, voxelEntity);
+					mapGraph.SetEntity(cellPosiiton.x + halfWidth, cellPosiiton.y + halfHeight, mapNode);
+				}
+				
+				readStream.Close();
+				return;
+			}
+
+			var voxels = _mapGenerator.GenerateGround(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE);
 
 			for (var i = 0; i < WorldUtils.WORLD_SIZE; i++)
 			{

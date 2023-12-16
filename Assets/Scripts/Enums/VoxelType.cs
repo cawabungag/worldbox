@@ -1,5 +1,8 @@
+using System;
+
 namespace Game.Services.MapGenerator
 {
+	[Serializable]
 	public enum VoxelType : byte
 	{
 		GroundWater = 0,

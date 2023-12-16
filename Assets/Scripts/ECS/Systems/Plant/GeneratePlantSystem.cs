@@ -1,6 +1,9 @@
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using Db.Plant;
 using DefaultNamespace.Components.Plant;
 using DefaultNamespace.Components.Weather;
+using DefaultNamespace.Systems.Save;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
 using Leopotam.EcsLite;
@@ -18,7 +21,6 @@ namespace ECS.Systems
 		public void Init(IEcsSystems systems)
 		{
 			var world = systems.GetWorld();
-
 			var voxelTypePool = world.GetPool<VoxelTypeComponent>();
 			var gridGraph = world.GetUnique<MapGraphComponent>().Value;
 			var weatherGraph = world.GetUnique<MapWeatherComponent>().Value;
@@ -26,6 +28,26 @@ namespace ECS.Systems
 			var poolPlantTypeComponent = world.GetPool<PlantTypeComponent>();
 			var poolPlantPoolIndexComponent = world.GetPool<PlantPoolIndexComponent>();
 			var poolPlantPositionComponent = world.GetPool<PlantPositionComponent>();
+			
+			if (File.Exists(Application.persistentDataPath + "/save.bin"))
+			{
+				var formatter = new BinaryFormatter();
+				Stream readStream = new FileStream(Application.persistentDataPath + "/save.bin", FileMode.Open, FileAccess.Read, FileShare.Read);
+				var saveData = (SaveData) formatter.Deserialize(readStream);
+				var plantSaveData = saveData.PlantsaveData;
+				foreach (var componentData in plantSaveData)
+				{
+					var newPlantEntity = world.NewEntity();
+					var plantsData = _plantsData.GetPlant(componentData.Value);
+					var posiiton = componentData.Key;
+					poolPlantPositionComponent.Add(newPlantEntity).Value = new Vector3Int(posiiton.X, posiiton.Y, posiiton.Z);
+					poolPlantTypeComponent.Add(newPlantEntity).Value = plantsData.Type;
+					poolPlantPoolIndexComponent.Add(newPlantEntity).Value = plantsData.PoolIndex;
+				}
+				
+				readStream.Close();
+				return;
+			}
 
 			for (var i = 0; i < WorldUtils.WORLD_SIZE; i++)
 			{
@@ -51,7 +73,7 @@ namespace ECS.Systems
 
 							var position = poolVoxelPositionComponent.Get(mapEntity).Value;
 							var plantPosition =
-								new Vector3(position.x, (int) voxelType, position.y);
+								new Vector3Int(position.x, (int) voxelType, position.y);
 							var newPlantEntity = world.NewEntity();
 							poolPlantPositionComponent.Add(newPlantEntity).Value = plantPosition;
 							poolPlantTypeComponent.Add(newPlantEntity).Value = plantData.Type;

@@ -4,6 +4,7 @@ using DefaultNamespace;
 using DefaultNamespace.Chunk;
 using DefaultNamespace.Components.Input;
 using DefaultNamespace.Systems.Plant;
+using DefaultNamespace.Systems.Save;
 using DefaultNamespace.Utils;
 using ECS.Systems;
 using Leopotam.EcsLite;
@@ -57,6 +58,7 @@ namespace Installers
 			
 			Container.Bind<IEcsSystem>().To<GeneratePlantSystem>().AsSingle();
 			Container.Bind<IEcsSystem>().To<CreatePlantSystem>().AsSingle();
+			Container.Bind<IEcsSystem>().To<SaveWorldSystem>().AsSingle();
 
 			Container.BindMemoryPool<ChunkView, ChunkView.Pool>()
 				.WithInitialSize(16)

@@ -1,9 +1,14 @@
+using System;
+using DefaultNamespace.Saver;
 using Plant;
 
 namespace DefaultNamespace.Components.Plant
 {
-	public struct PlantTypeComponent
+	[Serializable]
+	public struct PlantTypeComponent : ISerializableComponent<PlantType>
 	{
 		public PlantType Value;
+		public void Write(PlantType value) => Value = value;
+		public PlantType Read() => Value;
 	}
 }
