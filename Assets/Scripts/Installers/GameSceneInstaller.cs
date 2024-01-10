@@ -3,6 +3,7 @@ using Core.Camera;
 using Core.Camera.Impl;
 using Db.Brush;
 using Db.Tools;
+using DefaultNamespace.Systems.Save;
 using Game.Services.MapGenerator;
 using Game.Services.MapGenerator.Impls;
 using Services.Map;
@@ -38,6 +39,7 @@ namespace Installers
 				.AsSingle().NonLazy();
 			Container.Bind<IMapGenerator>().To<MapGenerator>().AsSingle();
 			Container.Bind<IMapService>().To<MapService>().AsSingle();
+			Container.Bind(typeof(ISaveModel), typeof(IInitializable)).To<SaveModel>().AsSingle();
 
 			Container.Bind<IUseToolStrategy>().To<UpBrushToolStrategy>().AsSingle();
 			Container.Bind<IUseToolStrategy>().To<DownBrushToolStrategy>().AsSingle();

@@ -1,5 +1,3 @@
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using Db.Plant;
 using DefaultNamespace.Components.Plant;
 using DefaultNamespace.Components.Weather;
@@ -14,9 +12,13 @@ namespace ECS.Systems
 	public class GeneratePlantSystem : IEcsInitSystem
 	{
 		private readonly PlantsData _plantsData;
+		private readonly ISaveModel _saveModel;
 
-		public GeneratePlantSystem(PlantsData plantsData)
-			=> _plantsData = plantsData;
+		public GeneratePlantSystem(PlantsData plantsData, ISaveModel saveModel)
+		{
+			_plantsData = plantsData;
+			_saveModel = saveModel;
+		}
 
 		public void Init(IEcsSystems systems)
 		{
@@ -28,24 +30,20 @@ namespace ECS.Systems
 			var poolPlantTypeComponent = world.GetPool<PlantTypeComponent>();
 			var poolPlantPoolIndexComponent = world.GetPool<PlantPoolIndexComponent>();
 			var poolPlantPositionComponent = world.GetPool<PlantPositionComponent>();
-			
-			if (File.Exists(Application.persistentDataPath + "/save.bin"))
+
+			if (_saveModel.LastSave != null)
 			{
-				var formatter = new BinaryFormatter();
-				Stream readStream = new FileStream(Application.persistentDataPath + "/save.bin", FileMode.Open, FileAccess.Read, FileShare.Read);
-				var saveData = (SaveData) formatter.Deserialize(readStream);
-				var plantSaveData = saveData.PlantsaveData;
+				var plantSaveData = _saveModel.LastSave.PlantsaveData;
 				foreach (var componentData in plantSaveData)
 				{
 					var newPlantEntity = world.NewEntity();
-					var plantsData = _plantsData.GetPlant(componentData.Value);
-					var posiiton = componentData.Key;
+					var plantsData = _plantsData.GetPlant(componentData.PlantType);
+					var posiiton = componentData.PlantPos;
 					poolPlantPositionComponent.Add(newPlantEntity).Value = new Vector3Int(posiiton.X, posiiton.Y, posiiton.Z);
 					poolPlantTypeComponent.Add(newPlantEntity).Value = plantsData.Type;
 					poolPlantPoolIndexComponent.Add(newPlantEntity).Value = plantsData.PoolIndex;
 				}
 				
-				readStream.Close();
 				return;
 			}
 

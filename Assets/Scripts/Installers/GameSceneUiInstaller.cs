@@ -1,3 +1,4 @@
+using DefaultNamespace.UI.Views.Save;
 using DefaultNamespace.Utils;
 using UI.Presenters;
 using UI.Views;
@@ -14,10 +15,18 @@ namespace Installers
 		[SerializeField]
 		private UiBrushHudView _uiBrushHudView;
 		
+		[SerializeField]
+		private UiSaveHudView _uiSaveHudView;
+		
+		[SerializeField]
+		private UiAutoSaveHudView _uiAutoSaveHudView;
+		
 		public override void InstallBindings()
 		{
 			Container.BindUi<UiToolHudPresenter, UiToolHudView>(_uiToolHudView);
 			Container.BindUi<UiBrushHudPresenter, UiBrushHudView>(_uiBrushHudView);
+			Container.BindUi<UiSaveHudPresenter, UiSaveHudView>(_uiSaveHudView);
+			Container.BindUi<UiAutoSaveHudPresenter, UiAutoSaveHudView>(_uiAutoSaveHudView);
 		}
 	}
 }

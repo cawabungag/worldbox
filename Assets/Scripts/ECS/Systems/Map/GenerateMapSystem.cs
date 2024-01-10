@@ -1,5 +1,3 @@
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using DefaultNamespace.Systems.Save;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
@@ -12,9 +10,13 @@ namespace ECS.Systems
 	public class GenerateMapSystem : IEcsInitSystem
 	{
 		private readonly IMapGenerator _mapGenerator;
+		private readonly ISaveModel _saveModel;
 
-		public GenerateMapSystem(IMapGenerator mapGenerator)
-			=> _mapGenerator = mapGenerator;
+		public GenerateMapSystem(IMapGenerator mapGenerator, ISaveModel saveModel)
+		{
+			_mapGenerator = mapGenerator;
+			_saveModel = saveModel;
+		}
 
 		public void Init(IEcsSystems systems)
 		{
@@ -25,24 +27,24 @@ namespace ECS.Systems
 			var halfWidth = WorldUtils.WORLD_SIZE / 2;
 			var halfHeight = WorldUtils.WORLD_SIZE / 2;
 			var mapGraph = new GridGraph<MapNode>(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE);
-			
-			if (File.Exists(Application.persistentDataPath + "/save.bin"))
+
+			int mapGraphEntity;
+			if (_saveModel.LastSave != null)
 			{
-				var formatter = new BinaryFormatter();
-				Stream readStream = new FileStream(Application.persistentDataPath + "/save.bin", FileMode.Open, FileAccess.Read, FileShare.Read);
-				var saveData = (SaveData) formatter.Deserialize(readStream);
-				var voxelsSaveData = saveData.VoxelsSaveData;
+				var voxelsSaveData = _saveModel.LastSave.VoxelsSaveData;
 				foreach (var componentData in voxelsSaveData)
 				{
 					var voxelEntity = world.NewEntity();
-					var cellPosiiton = new Vector2Int(componentData.Key.X, componentData.Key.Y);
+					var voxelPos = componentData.VoxelPos;
+					var cellPosiiton = new Vector2Int(voxelPos.X, voxelPos.Y);
 					voxelPositionPool.Add(voxelEntity).Value = cellPosiiton;
-					voxelTypePool.Add(voxelEntity).Value = componentData.Value;
+					voxelTypePool.Add(voxelEntity).Value = componentData.VoxelType;
 					var mapNode = new MapNode(cellPosiiton, voxelEntity);
 					mapGraph.SetEntity(cellPosiiton.x + halfWidth, cellPosiiton.y + halfHeight, mapNode);
+					mapGraphEntity = world.NewEntity();
+					world.GetPool<MapGraphComponent>().Add(mapGraphEntity).Value = mapGraph;
 				}
 				
-				readStream.Close();
 				return;
 			}
 
@@ -65,7 +67,7 @@ namespace ECS.Systems
 				}
 			}
 
-			var mapGraphEntity = world.NewEntity();
+			mapGraphEntity = world.NewEntity();
 			world.GetPool<MapGraphComponent>().Add(mapGraphEntity).Value = mapGraph;
 		}
 	}
