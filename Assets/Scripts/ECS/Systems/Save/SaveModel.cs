@@ -79,32 +79,25 @@ namespace DefaultNamespace.Systems.Save
 		public async Task<List<SaveData>> LoadAll()
 		{
 			var saves = new List<SaveData>();
+
+			if (!Directory.Exists(_persistentDataPath)) 
+				return saves;
 			
-			if (Directory.Exists(_persistentDataPath))
+			var fileNames = Directory.GetFiles(_persistentDataPath);
+			for (var index = fileNames.Length - 1; index >= 0; index--)
 			{
-				var fileNames = Directory.GetFiles(_persistentDataPath);
-				var max = 0;
-				for (var index = fileNames.Length - 1; index >= 0; index--)
+				var fileName = fileNames[index];
+				var saveTime = fileName
+					.Replace("save", string.Empty)
+					.Replace(".bin", string.Empty)
+					.Replace(Application.persistentDataPath, string.Empty)
+					.Replace("/", string.Empty);
+
+				if (DateTime.TryParseExact(saveTime, "yyyy-MM-dd:HH:mm:ss", null,
+						System.Globalization.DateTimeStyles.None, out var result))
 				{
-					var fileName = fileNames[index];
-					if (max > 3)
-					{
-						return saves;
-					}
-
-					var saveTime = fileName
-						.Replace("save", string.Empty)
-						.Replace(".bin", string.Empty)
-						.Replace(Application.persistentDataPath, string.Empty)
-						.Replace("/", string.Empty);
-
-					if (DateTime.TryParseExact(saveTime, "yyyy-MM-dd:HH:mm:ss", null,
-							System.Globalization.DateTimeStyles.None, out var result))
-					{
-						var save = await LoadAsync(result);
-						saves.Add(save);
-						max++;
-					}
+					var save = await LoadAsync(result);
+					saves.Add(save);
 				}
 			}
 
