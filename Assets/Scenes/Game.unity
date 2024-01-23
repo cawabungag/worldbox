@@ -1234,6 +1234,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ViewSaveHud
       objectReference: {fileID: 0}
+    - target: {fileID: 1733212238503850908, guid: 6bf722fdec6c545f09e2dc885fc1e945, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4588856833899861335, guid: 6bf722fdec6c545f09e2dc885fc1e945, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

@@ -1,3 +1,4 @@
+using System;
 using Core.WindowService;
 using Db.Tools;
 using DefaultNamespace.Components.Input;
@@ -5,14 +6,16 @@ using DefaultNamespace.Utils;
 using Leopotam.EcsLite;
 using Tools;
 using UI.Views;
-using UnityEngine;
 using Zenject;
+using Object = UnityEngine.Object;
 
 namespace UI.Presenters
 {
 	public class UiToolHudPresenter : BasePresenter<UiToolHudView>, IInitializable
 	{
 		private readonly ToolsData _toolsData;
+		private readonly UiSaveHudPresenter _saveHudPresenter;
+		private readonly IWindowService _windowService;
 		private readonly EcsPool<InputToolComponent> _poolInputTool;
 		private readonly EcsFilter _filterTool;
 		public override bool IsPopUp => false;
@@ -20,9 +23,10 @@ namespace UI.Presenters
 		public UiToolHudPresenter(UiToolHudView view,
 			ToolsData toolsData,
 			[Inject(Id = WorldUtils.INPUT_WORLD_NAME)]
-			EcsWorld inputWorld) : base(view)
+			EcsWorld inputWorld, UiSaveHudPresenter saveHudPresenter) : base(view)
 		{
 			_toolsData = toolsData;
+			_saveHudPresenter = saveHudPresenter;
 			_poolInputTool = inputWorld.GetPool<InputToolComponent>();
 			_filterTool = inputWorld.Filter<InputToolComponent>().End();
 		}
@@ -43,16 +47,45 @@ namespace UI.Presenters
 		private void OnToggleValueChanged(bool isOn, ToolType toggleToolType)
 		{
 			ref var toolType = ref _poolInputTool.Get(_filterTool.GetRawEntities()[0]).Value;
+			var toolData = _toolsData.GetTool(toggleToolType);
+
 			if (toggleToolType == toolType)
 			{
 				if (isOn) 
 					return;
+				
+				if (toolData.IsSystemTool)
+				{
+					switch (toolData.WindowType)
+					{
+						case ToolWindowType.None:
+							break;
+						case ToolWindowType.Save:
+							_saveHudPresenter.Close();
+							break;
+						default:
+							throw new ArgumentOutOfRangeException();
+					}
+				}
 				
 				toolType = ToolType.None;
 				return;
 			}
 
 			toolType = toggleToolType;
+			if (toolData.IsSystemTool)
+			{
+				switch (toolData.WindowType)
+				{
+					case ToolWindowType.None:
+						break;
+					case ToolWindowType.Save:
+						_saveHudPresenter.Open();
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			}
 		}
 	}
 }

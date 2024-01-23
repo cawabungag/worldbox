@@ -18,10 +18,11 @@ namespace Tools
 			_brushesData = brushesData;
 		}
 
-		public void Use(Vector3 worldTouchPoint,
+		protected abstract void Use(List<MapNode> entities);
+
+		public void UseBrush(Vector3 worldTouchPoint,
 			BrushType brushType,
-			int brushSize,
-			bool isBrushTool)
+			int brushSize)
 		{
 			//TODO Refactoring convert posiiton
 			var inputPoint = new Vector2Int((int) worldTouchPoint.x, (int) worldTouchPoint.y);
@@ -32,7 +33,7 @@ namespace Tools
 				if (entity == -1)
 					return;
 
-				Use(new List<MapNode> { new(inputPoint, entity) });
+				Use(new List<MapNode> {new(inputPoint, entity)});
 				return;
 			}
 
@@ -44,6 +45,14 @@ namespace Tools
 			Use(entities);
 		}
 
-		protected abstract void Use(List<MapNode> entities);
+		public void SingleCellUse(Vector3 worldTouchPoint)
+		{
+			var inputPoint = new Vector2Int((int) worldTouchPoint.x, (int) worldTouchPoint.y);
+			var entity = _mapService.GetVoxelEntity(inputPoint);
+			if (entity == -1)
+				return;
+
+			Use(new List<MapNode> {new(inputPoint, entity)});
+		}
 	}
 }

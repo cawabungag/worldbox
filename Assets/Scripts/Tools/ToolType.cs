@@ -17,6 +17,9 @@ namespace Tools
 		//Plant
 		Palm,
 		Tree,
-		Cactus
+		Cactus,
+		
+		//System
+		Save
 	}
 }

@@ -1,3 +1,4 @@
+using Core.WindowService;
 using DefaultNamespace.UI.Views.Save;
 using DefaultNamespace.Utils;
 using UI.Presenters;
@@ -23,6 +24,7 @@ namespace Installers
 		
 		public override void InstallBindings()
 		{
+			Container.Bind<IWindowService>().To<WindowService>().AsSingle().NonLazy();
 			Container.BindUi<UiToolHudPresenter, UiToolHudView>(_uiToolHudView);
 			Container.BindUi<UiBrushHudPresenter, UiBrushHudView>(_uiBrushHudView);
 			Container.BindUi<UiSaveHudPresenter, UiSaveHudView>(_uiSaveHudView);

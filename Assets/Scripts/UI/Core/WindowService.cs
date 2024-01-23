@@ -1,27 +1,28 @@
 using System;
 using System.Collections.Generic;
+using Zenject;
 
 namespace Core.WindowService
 {
 	public class WindowService : IWindowService
 	{
-		private readonly List<IPresenter> _registeredPresenters;
+		private readonly DiContainer _container;
 		private readonly Stack<IPresenter> _presentersStack = new();
 
-		public WindowService(IPresenter[] presenters)
+		public WindowService(DiContainer container)
 		{
-			_registeredPresenters = new List<IPresenter>(presenters);
+			_container = container;
 		}
 
 		public void DisposePresenters()
 		{
-			foreach (var presenter in _registeredPresenters)
+			var registeredPresenters = _container.Resolve<IPresenter[]>();
+			foreach (var presenter in registeredPresenters)
 			{
 				presenter.Close();
 				presenter.Dispose();
 			}
 
-			_registeredPresenters.Clear();
 			_presentersStack.Clear();
 		}
 
@@ -44,7 +45,8 @@ namespace Core.WindowService
 
 		private IPresenter GetPresenter<T>()
 		{
-			foreach (var presenter in _registeredPresenters)
+			var registeredPresenters = _container.Resolve<IPresenter[]>();
+			foreach (var presenter in registeredPresenters)
 				if (presenter.GetType() == typeof(T))
 					return presenter;
 

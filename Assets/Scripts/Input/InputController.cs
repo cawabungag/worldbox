@@ -88,7 +88,15 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 			var brushType = _input.GetUnique<InputBrushTypeComponent>().Value;
 			var brushSize = _input.GetUnique<InputBrushSizeComponent>().Value;
 			var isBrushTool = _input.GetUnique<InputIsBrushToolComponent>().Value;
-			_useToolStrategies[toolType].Use(worldTouchPoint, brushType, brushSize, isBrushTool);
+			
+			if (isBrushTool)
+			{
+				_useToolStrategies[toolType].UseBrush(worldTouchPoint, brushType, brushSize);
+			}
+			else
+			{
+				_useToolStrategies[toolType].SingleCellUse(worldTouchPoint);
+			}
 		}
 		else
 		{

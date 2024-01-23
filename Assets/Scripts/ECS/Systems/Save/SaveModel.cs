@@ -16,9 +16,11 @@ namespace DefaultNamespace.Systems.Save
 			get => null;
 			private set { }
 		}
+		
 		public bool IsSaveInProcess { get; private set; }
 		public const string LAST_SAVE_PREFS_KEY = "lastsave";
 		private string _persistentDataPath = Application.persistentDataPath;
+		private string _lastSavePath;
 
 		public async void Initialize()
 		{
@@ -26,6 +28,7 @@ namespace DefaultNamespace.Systems.Save
 			if (lastSave.IsEmpty())
 				return;
 
+			_lastSavePath = Path.Combine(_persistentDataPath, $"save{lastSave}.bin");
 			if (DateTime.TryParseExact(lastSave, "yyyy-MM-dd:HH:mm:ss", null, System.Globalization.DateTimeStyles.None, out var result))
 			{
 				LastSave = await LoadAsync(result);
@@ -38,13 +41,23 @@ namespace DefaultNamespace.Systems.Save
 			var filePath = Path.Combine(_persistentDataPath, $"save{saveDateTime:yyyy-MM-dd:HH:mm:ss}.bin");
 			IsSaveInProcess = true;
 			
-			return Task.Run(() =>
+			return Task.Run(async () =>
 			{
-				var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+				if (_lastSavePath != null)
+				{
+					if (File.Exists(_lastSavePath))
+					{
+						File.Delete(_lastSavePath);
+						Debug.LogError($"Delete save from disk : {_lastSavePath}");
+					}
+				}
+				
+				_lastSavePath = filePath;
+				var stream = new FileStream(_lastSavePath, FileMode.Create, FileAccess.Write, FileShare.None);
 				var formatter = new BinaryFormatter();
 				formatter.Serialize(stream, saveData);
-				stream.DisposeAsync();
-				Debug.LogError($"Write save on disk : {saveDateTime:yyyy-MM-dd:HH:mm:ss}");
+				await stream.DisposeAsync();
+				Debug.LogError($"Write save on disk : {saveDateTime:yyyy-MM-dd:HH:mm:ss} at path: {filePath}");
 				IsSaveInProcess = false;
 			});
 		}
