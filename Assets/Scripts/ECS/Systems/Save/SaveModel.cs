@@ -48,7 +48,7 @@ namespace DefaultNamespace.Systems.Save
 					if (File.Exists(_lastSavePath))
 					{
 						File.Delete(_lastSavePath);
-						Debug.LogError($"Delete save from disk : {_lastSavePath}");
+						Debug.Log($"Delete save from disk : {_lastSavePath}");
 					}
 				}
 				
@@ -57,7 +57,7 @@ namespace DefaultNamespace.Systems.Save
 				var formatter = new BinaryFormatter();
 				formatter.Serialize(stream, saveData);
 				await stream.DisposeAsync();
-				Debug.LogError($"Write save on disk : {saveDateTime:yyyy-MM-dd:HH:mm:ss} at path: {filePath}");
+				Debug.Log($"Write save on disk : {saveDateTime:yyyy-MM-dd:HH:mm:ss} at path: {filePath}");
 				IsSaveInProcess = false;
 			});
 		}

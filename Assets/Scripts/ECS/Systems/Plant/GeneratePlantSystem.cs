@@ -28,10 +28,10 @@ namespace ECS.Systems
 			var weatherGraph = world.GetUnique<MapWeatherComponent>().Value;
 			var poolVoxelPositionComponent = world.GetPool<VoxelPositionComponent>();
 			var poolPlantTypeComponent = world.GetPool<PlantTypeComponent>();
-			var poolPlantPoolIndexComponent = world.GetPool<PlantPoolIndexComponent>();
+			var poolPlantPoolIndexComponent = world.GetPool<PoolIndexComponent>();
 			var poolPlantPositionComponent = world.GetPool<PlantPositionComponent>();
 
-			if (_saveModel.LastSave != null)
+			if (_saveModel.LastSave != null && WorldUtils.SAVE_ENABLE)
 			{
 				var plantSaveData = _saveModel.LastSave.PlantsaveData;
 				foreach (var componentData in plantSaveData)

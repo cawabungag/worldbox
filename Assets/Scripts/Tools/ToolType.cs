@@ -19,6 +19,9 @@ namespace Tools
 		Tree,
 		Cactus,
 		
+		//Units
+		Chicken,
+		
 		//System
 		Save
 	}

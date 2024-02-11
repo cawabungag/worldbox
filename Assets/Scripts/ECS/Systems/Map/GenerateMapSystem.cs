@@ -29,7 +29,7 @@ namespace ECS.Systems
 			var mapGraph = new GridGraph<MapNode>(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE);
 
 			int mapGraphEntity;
-			if (_saveModel.LastSave != null)
+			if (_saveModel.LastSave != null && WorldUtils.SAVE_ENABLE)
 			{
 				var voxelsSaveData = _saveModel.LastSave.VoxelsSaveData;
 				foreach (var componentData in voxelsSaveData)

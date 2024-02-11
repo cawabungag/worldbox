@@ -8,5 +8,7 @@ namespace DefaultNamespace.Utils
 
 		public const float MIN_TEMPERATURE = -30;
 		public const float MAX_TEMPERATURE = +30;
+
+		public const bool SAVE_ENABLE = false;
 	}
 }

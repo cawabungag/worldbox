@@ -20,7 +20,7 @@ namespace DefaultNamespace.Components.Plant
 		private readonly EcsPool<VoxelTypeComponent> _poolVoxelTypeCompoenent;
 		private readonly EcsPool<PlantPositionComponent> _poolPlantPosiiton;
 		private readonly EcsPool<PlantTypeComponent> _poolPlantTypeComponent;
-		private readonly EcsPool<PlantPoolIndexComponent> _poolPlantPoolIndexComponent;
+		private readonly EcsPool<PoolIndexComponent> _poolPlantPoolIndexComponent;
 
 		public BasePlantStrategy(IMapService mapService,
 			BrushesData brushesData,
@@ -33,7 +33,7 @@ namespace DefaultNamespace.Components.Plant
 
 			_poolVoxelTypeCompoenent = world.GetPool<VoxelTypeComponent>();
 			_poolVoxelPosition = world.GetPool<VoxelPositionComponent>();
-			_poolPlantPoolIndexComponent = world.GetPool<PlantPoolIndexComponent>();
+			_poolPlantPoolIndexComponent = world.GetPool<PoolIndexComponent>();
 			_poolPlantPosiiton = world.GetPool<PlantPositionComponent>();
 			_poolPlantTypeComponent = world.GetPool<PlantTypeComponent>();
 		}

@@ -9,7 +9,7 @@ namespace DefaultNamespace.Systems.Plant
 	public class CreatePlantSystem : IEcsInitSystem, IEcsRunSystem
 	{
 		private readonly List<PlantView.Pool> _palmPool;
-		private readonly EcsPool<PlantPoolIndexComponent> _poolPlantPoolIndexComponent;
+		private readonly EcsPool<PoolIndexComponent> _poolPlantPoolIndexComponent;
 		private readonly EcsPool<PlantPositionComponent> _poolPlantPosiiton;
 		private readonly EcsPool<SpawnedComponent> _poolSpawnedComponent;
 		private EcsFilter _filterNewPlant;
@@ -17,7 +17,7 @@ namespace DefaultNamespace.Systems.Plant
 		public CreatePlantSystem(DiContainer container, EcsWorld world)
 		{
 			_palmPool = container.ResolveAll<PlantView.Pool>();
-			_poolPlantPoolIndexComponent = world.GetPool<PlantPoolIndexComponent>();
+			_poolPlantPoolIndexComponent = world.GetPool<PoolIndexComponent>();
 			_poolPlantPosiiton = world.GetPool<PlantPositionComponent>();
 			_poolSpawnedComponent = world.GetPool<SpawnedComponent>();
 		}
@@ -27,7 +27,7 @@ namespace DefaultNamespace.Systems.Plant
 			var world = systems.GetWorld();
 			_filterNewPlant = world.Filter<PlantTypeComponent>()
 				.Inc<PlantPositionComponent>()
-				.Inc<PlantPoolIndexComponent>()
+				.Inc<PoolIndexComponent>()
 				.Exc<SpawnedComponent>()
 				.End();
 		}

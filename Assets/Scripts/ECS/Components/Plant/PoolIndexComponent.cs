@@ -1,6 +1,6 @@
 namespace DefaultNamespace.Components.Plant
 {
-	public struct PlantPoolIndexComponent
+	public struct PoolIndexComponent
 	{
 		public int Value;
 	}
