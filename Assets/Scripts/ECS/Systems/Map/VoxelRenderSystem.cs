@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
 using Game.Services.MapGenerator;
-using Leopotam.EcsLite;
 using Services.Map;
 using UnityEngine;
 using UnityEngine.Rendering;
+using XFlow.EcsLite;
 
 namespace ECS.Systems
 {
@@ -27,7 +27,7 @@ namespace ECS.Systems
 			_mapService = mapService;
 		}
 
-		public void Init(IEcsSystems systems)
+		public void Init(EcsSystems systems)
 		{
 			var timestamp1 = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
 

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using DefaultNamespace.Components.Plant;
-using Leopotam.EcsLite;
 using Plant;
+using XFlow.EcsLite;
 using Zenject;
 
 namespace DefaultNamespace.Systems.Plant
@@ -22,7 +22,7 @@ namespace DefaultNamespace.Systems.Plant
 			_poolSpawnedComponent = world.GetPool<SpawnedComponent>();
 		}
 		
-		public void Init(IEcsSystems systems)
+		public void Init(EcsSystems systems)
 		{
 			var world = systems.GetWorld();
 			_filterNewPlant = world.Filter<PlantTypeComponent>()
@@ -32,7 +32,7 @@ namespace DefaultNamespace.Systems.Plant
 				.End();
 		}
 
-		public void Run(IEcsSystems systems)
+		public void Run(EcsSystems systems)
 		{
 			if (_filterNewPlant.GetEntitiesCount() == 0)
 				return;

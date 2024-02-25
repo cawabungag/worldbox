@@ -4,11 +4,11 @@ using System.Linq;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
 using Game.Services.MapGenerator;
-using Leopotam.EcsLite;
 using Services.Map;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
+using XFlow.EcsLite;
 
 namespace ECS.Systems
 {
@@ -50,7 +50,7 @@ namespace ECS.Systems
 			}
 		}
 
-		public void Init(IEcsSystems systems)
+		public void Init(EcsSystems systems)
 		{
 			_poolNeedUpdateChunk = _world.GetPool<NeedUpdateChunkComponent>();
 			_poolChunkView = _world.GetPool<ChunkViewCompoenent>();
@@ -63,7 +63,7 @@ namespace ECS.Systems
 				.End();
 		}
 
-		public void Run(IEcsSystems systems)
+		public void Run(EcsSystems systems)
 		{
 			Profiler.BeginSample("UpdateChunksSystem");
 
@@ -86,7 +86,7 @@ namespace ECS.Systems
 				
 				_lastBufferIndex = 0;
 
-				ref var isNeedUpdate = ref _poolNeedUpdateChunk.Get(entity).Value;
+				ref var isNeedUpdate = ref _poolNeedUpdateChunk.GetRef(entity).Value;
 				if (!isNeedUpdate)
 					continue;
 

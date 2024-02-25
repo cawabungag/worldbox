@@ -1,13 +1,13 @@
 using DefaultNamespace.Components.Weather;
 using DefaultNamespace.Utils;
-using Leopotam.EcsLite;
 using UnityEngine;
+using XFlow.EcsLite;
 
 namespace ECS.Systems
 {
 	public class GenerateWeatherSystem : IEcsInitSystem
 	{
-		public void Init(IEcsSystems systems)
+		public void Init(EcsSystems systems)
 		{
 			var world = systems.GetWorld();
 			var halfWidth = WorldUtils.WORLD_SIZE / 2;

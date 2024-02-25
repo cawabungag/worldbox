@@ -1,5 +1,5 @@
 using System;
-using Leopotam.EcsLite;
+using XFlow.EcsLite;
 using Zenject;
 
 namespace DefaultNamespace

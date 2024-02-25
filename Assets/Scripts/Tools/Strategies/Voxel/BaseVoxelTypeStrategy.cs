@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using Db.Brush;
 using ECS.Components.Map;
 using Game.Services.MapGenerator;
-using Leopotam.EcsLite;
 using Services.Map;
+using XFlow.EcsLite;
 
 namespace Tools
 {
@@ -35,9 +35,9 @@ namespace Tools
 				if (voxelType == VoxelType)
 					continue;
 				
-				_poolVoxelType.Get(entity).Value = VoxelType;
+				_poolVoxelType.GetRef(entity).Value = VoxelType;
 				var chunkEntity = _poolChunkEntity.Get(entity).Value;
-				_poolNeedUpdateChunk.Get(chunkEntity).Value = true;
+				_poolNeedUpdateChunk.GetRef(chunkEntity).Value = true;
 			}
 		}
 	}

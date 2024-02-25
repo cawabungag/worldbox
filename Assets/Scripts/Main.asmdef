@@ -4,6 +4,7 @@
     "Zenject",
     "Leopotam.EcsLite",
     "Unity.TextMeshPro",
-    "UniRx"
+    "UniRx",
+    "xflow.ecs"
   ]
 }

@@ -1,4 +1,4 @@
-using Leopotam.EcsLite;
+using XFlow.EcsLite;
 
 namespace DefaultNamespace.Utils
 {
@@ -17,7 +17,7 @@ namespace DefaultNamespace.Utils
 			var filter = world.Filter<T>().End();
 			var pool = world.GetPool<T>();
 			var entity = filter.GetRawEntities()[0];
-			return ref pool.Get(entity);
+			return ref pool.GetRef(entity);
 		}
 	}
 }

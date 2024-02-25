@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using Db.Brush;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
-using Leopotam.EcsLite;
 using UnityEngine;
 using UnityEngine.Profiling;
+using XFlow.EcsLite;
 
 namespace Services.Map
 {

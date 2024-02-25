@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using DefaultNamespace.Chunk;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
-using Leopotam.EcsLite;
 using UnityEngine;
+using XFlow.EcsLite;
 
 namespace ECS.Systems
 {
@@ -14,7 +14,7 @@ namespace ECS.Systems
 
 		public ChunkCreateSystem(ChunkView.Pool poolChunks) => _poolChunks = poolChunks;
 
-		public void Init(IEcsSystems systems)
+		public void Init(EcsSystems systems)
 		{
 			var world = systems.GetWorld();
 			var entities = world.Filter<VoxelPositionComponent>()

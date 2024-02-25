@@ -3,8 +3,8 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using DefaultNamespace.Components.Plant;
 using ECS.Components.Map;
-using Leopotam.EcsLite;
 using UnityEngine;
+using XFlow.EcsLite;
 
 namespace DefaultNamespace.Systems.Save
 {
@@ -29,7 +29,7 @@ namespace DefaultNamespace.Systems.Save
 			_saveModel = saveModel;
 		}
 
-		public void Init(IEcsSystems systems)
+		public void Init(EcsSystems systems)
 		{
 			var world = systems.GetWorld();
 			_filterVoxels = world.Filter<VoxelTypeComponent>().Inc<VoxelPositionComponent>().End();
@@ -41,7 +41,7 @@ namespace DefaultNamespace.Systems.Save
 			_plantPositionPool = world.GetPool<PlantPositionComponent>();
 		}
 
-		public void Run(IEcsSystems systems)
+		public void Run(EcsSystems systems)
 		{
 			if (Time.realtimeSinceStartup < DURATIONS_BETWEEN_SAVE || Time.realtimeSinceStartup - _lastTimeSave < DURATIONS_BETWEEN_SAVE)
 				return;

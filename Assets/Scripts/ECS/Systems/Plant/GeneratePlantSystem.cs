@@ -4,8 +4,8 @@ using DefaultNamespace.Components.Weather;
 using DefaultNamespace.Systems.Save;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
-using Leopotam.EcsLite;
 using UnityEngine;
+using XFlow.EcsLite;
 
 namespace ECS.Systems
 {
@@ -20,7 +20,7 @@ namespace ECS.Systems
 			_saveModel = saveModel;
 		}
 
-		public void Init(IEcsSystems systems)
+		public void Init(EcsSystems systems)
 		{
 			var world = systems.GetWorld();
 			var voxelTypePool = world.GetPool<VoxelTypeComponent>();

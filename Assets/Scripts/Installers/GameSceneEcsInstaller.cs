@@ -7,10 +7,10 @@ using DefaultNamespace.Systems.Plant;
 using DefaultNamespace.Systems.Save;
 using DefaultNamespace.Utils;
 using ECS.Systems;
-using Leopotam.EcsLite;
 using Plant;
 using Tools;
 using UnityEngine;
+using XFlow.EcsLite;
 using Zenject;
 
 namespace Installers
@@ -33,8 +33,8 @@ namespace Installers
 				Filters = WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE + WorldUtils.CHUNK_SIZE,
 				Pools = WorldUtils.WORLD_SIZE * WorldUtils.WORLD_SIZE + WorldUtils.CHUNK_SIZE
 			};
-			
-			var ecsWorld = new EcsWorld(config);
+
+			var ecsWorld = new EcsWorld(cfg : config);
 			Container.BindInstance(ecsWorld);
 
 			Container.BindInstance(_plantsData);

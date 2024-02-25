@@ -3,9 +3,9 @@ using Core.WindowService;
 using Db.Tools;
 using DefaultNamespace.Components.Input;
 using DefaultNamespace.Utils;
-using Leopotam.EcsLite;
 using Tools;
 using UI.Views;
+using XFlow.EcsLite;
 using Zenject;
 using Object = UnityEngine.Object;
 
@@ -46,7 +46,7 @@ namespace UI.Presenters
 
 		private void OnToggleValueChanged(bool isOn, ToolType toggleToolType)
 		{
-			ref var toolType = ref _poolInputTool.Get(_filterTool.GetRawEntities()[0]).Value;
+			ref var toolType = ref _poolInputTool.GetRef(_filterTool.GetRawEntities()[0]).Value;
 			var toolData = _toolsData.GetTool(toggleToolType);
 
 			if (toggleToolType == toolType)

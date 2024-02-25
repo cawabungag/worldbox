@@ -4,12 +4,12 @@ using System.Linq;
 using Core.Camera;
 using DefaultNamespace.Components.Input;
 using DefaultNamespace.Utils;
-using Leopotam.EcsLite;
 using Tools;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Profiling;
+using XFlow.EcsLite;
 using Zenject;
 
 public class InputController : IInitializable, IDisposable, ILateTickable
@@ -82,7 +82,7 @@ public class InputController : IInitializable, IDisposable, ILateTickable
 			if (!_poolDrawPosiiton.Has(entity))
 				_poolDrawPosiiton.Add(entity).Value = touchPoint;
 			else
-				_poolDrawPosiiton.Get(entity).Value = touchPoint;
+				_poolDrawPosiiton.GetRef(entity).Value = touchPoint;
 
 			var worldTouchPoint = GetWorldPosition();
 			var brushType = _input.GetUnique<InputBrushTypeComponent>().Value;

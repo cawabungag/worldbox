@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using Db.Brush;
 using ECS.Components.Map;
 using Game.Services.MapGenerator;
-using Leopotam.EcsLite;
 using Services.Map;
 using UnityEngine;
+using XFlow.EcsLite;
 
 namespace Tools
 {
@@ -37,8 +37,8 @@ namespace Tools
 				var newVoxelType = voxelType + 1;
 				newVoxelType = (VoxelType) Mathf.Min((int) newVoxelType, MAXIMUM_VOXEL_TYPE);
 				var chunkEntity = _poolChunkEntity.Get(entity).Value;
-				_poolVoxelType.Get(entity).Value = newVoxelType;
-				_poolNeedUpdateChunk.Get(chunkEntity).Value = true;
+				_poolVoxelType.GetRef(entity).Value = newVoxelType;
+				_poolNeedUpdateChunk.GetRef(chunkEntity).Value = true;
 			}
 		}
 	}
