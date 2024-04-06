@@ -806,6 +806,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _chunkView: {fileID: 8672665192045178163, guid: 3b75e93157ead42a79ea061e30e92527, type: 3}
   _plantsData: {fileID: 11400000, guid: e7d2e74b6bfb44bcbb78fd15a4d3f19b, type: 2}
+  _gameSetting: {fileID: 11400000, guid: c79681b3666484c388de26f52c15c4c9, type: 2}
 --- !u!114 &1621095620
 MonoBehaviour:
   m_ObjectHideFlags: 0

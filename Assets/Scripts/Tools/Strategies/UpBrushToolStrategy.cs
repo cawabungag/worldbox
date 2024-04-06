@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Db.Brush;
 using ECS.Components.Map;
 using Game.Services.MapGenerator;
@@ -10,7 +12,6 @@ namespace Tools
 {
 	public class UpBrushToolStrategy : BaseBrushToolStrategy
 	{
-		private const int MAXIMUM_VOXEL_TYPE = 8;
 		private readonly EcsPool<VoxelTypeComponent> _poolVoxelType;
 		private readonly EcsPool<ChunkEntityComponent> _poolChunkEntity;
 		private readonly EcsPool<NeedUpdateChunkComponent> _poolNeedUpdateChunk;
@@ -35,7 +36,8 @@ namespace Tools
 
 				var voxelType = _poolVoxelType.Get(entity).Value;
 				var newVoxelType = voxelType + 1;
-				newVoxelType = (VoxelType) Mathf.Min((int) newVoxelType, MAXIMUM_VOXEL_TYPE);
+				var maxVoxelType = Enum.GetValues(typeof(VoxelType)).Cast<byte>().Max() + 1;
+				newVoxelType = (VoxelType) Mathf.Min((int) newVoxelType, maxVoxelType);
 				var chunkEntity = _poolChunkEntity.Get(entity).Value;
 				_poolVoxelType.Get(entity).Value = newVoxelType;
 				_poolNeedUpdateChunk.Get(chunkEntity).Value = true;

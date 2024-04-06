@@ -1,3 +1,4 @@
+using DefaultNamespace.Db;
 using DefaultNamespace.Systems.Save;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
@@ -11,11 +12,13 @@ namespace ECS.Systems
 	{
 		private readonly IMapGenerator _mapGenerator;
 		private readonly ISaveModel _saveModel;
+		private readonly GameSetting _gameSetting;
 
-		public GenerateMapSystem(IMapGenerator mapGenerator, ISaveModel saveModel)
+		public GenerateMapSystem(IMapGenerator mapGenerator, ISaveModel saveModel, GameSetting gameSetting)
 		{
 			_mapGenerator = mapGenerator;
 			_saveModel = saveModel;
+			_gameSetting = gameSetting;
 		}
 
 		public void Init(IEcsSystems systems)
@@ -29,7 +32,7 @@ namespace ECS.Systems
 			var mapGraph = new GridGraph<MapNode>(WorldUtils.WORLD_SIZE, WorldUtils.WORLD_SIZE);
 
 			int mapGraphEntity;
-			if (_saveModel.LastSave != null && WorldUtils.SAVE_ENABLE)
+			if (_saveModel.LastSave != null && _gameSetting.IsSaveEnable)
 			{
 				var voxelsSaveData = _saveModel.LastSave.VoxelsSaveData;
 				foreach (var componentData in voxelsSaveData)

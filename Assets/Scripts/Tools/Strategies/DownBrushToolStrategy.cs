@@ -10,7 +10,7 @@ namespace Tools
 {
 	public class DownBrushToolStrategy : BaseBrushToolStrategy
 	{
-		private const int MINIMUM_VOXEL_TYPE = 1;
+		private const int MINIMUM_VOXEL_TYPE = 0;
 		private readonly EcsPool<VoxelTypeComponent> _poolVoxelType;
 		private readonly EcsPool<ChunkEntityComponent> _poolChunkEntity;
 		private readonly EcsPool<NeedUpdateChunkComponent> _poolNeedUpdateChunk;

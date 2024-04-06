@@ -2,6 +2,7 @@ using System;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using DefaultNamespace.Components.Plant;
+using DefaultNamespace.Db;
 using ECS.Components.Map;
 using Leopotam.EcsLite;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace DefaultNamespace.Systems.Save
 	public class SaveWorldSystem : IEcsInitSystem, IEcsRunSystem
 	{
 		private readonly ISaveModel _saveModel;
+		private readonly GameSetting _gameSetting;
 
 		private EcsFilter _filterVoxels;
 		private EcsFilter _filterPlants;
@@ -24,9 +26,10 @@ namespace DefaultNamespace.Systems.Save
 		private float _lastTimeSave;
 		private const float DURATIONS_BETWEEN_SAVE = 10f;
 
-		public SaveWorldSystem(ISaveModel saveModel)
+		public SaveWorldSystem(ISaveModel saveModel, GameSetting gameSetting)
 		{
 			_saveModel = saveModel;
+			_gameSetting = gameSetting;
 		}
 
 		public void Init(IEcsSystems systems)
@@ -43,6 +46,9 @@ namespace DefaultNamespace.Systems.Save
 
 		public void Run(IEcsSystems systems)
 		{
+			if (!_gameSetting.IsSaveEnable)
+				return;
+            
 			if (Time.realtimeSinceStartup < DURATIONS_BETWEEN_SAVE || Time.realtimeSinceStartup - _lastTimeSave < DURATIONS_BETWEEN_SAVE)
 				return;
 			

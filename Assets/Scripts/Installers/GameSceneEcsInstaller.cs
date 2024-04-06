@@ -3,6 +3,7 @@ using Db.Plant;
 using DefaultNamespace;
 using DefaultNamespace.Chunk;
 using DefaultNamespace.Components.Input;
+using DefaultNamespace.Db;
 using DefaultNamespace.Systems.Plant;
 using DefaultNamespace.Systems.Save;
 using DefaultNamespace.Utils;
@@ -22,6 +23,9 @@ namespace Installers
 
 		[SerializeField]
 		private PlantsData _plantsData;
+		
+		[SerializeField]
+		private GameSetting _gameSetting;
 
 		public override void InstallBindings()
 		{
@@ -38,6 +42,7 @@ namespace Installers
 			Container.BindInstance(ecsWorld);
 
 			Container.BindInstance(_plantsData);
+			Container.BindInstance(_gameSetting);
 
 			var inputEcsWorld = new EcsWorld();
 			Container.BindInstance(inputEcsWorld).WithId(WorldUtils.INPUT_WORLD_NAME);

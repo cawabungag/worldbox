@@ -1,12 +1,12 @@
 using UnityEngine;
 
-public class Node<T>
+public struct Node<T>
 {
 	public T Value;
 	public Node(T value) => Value = value;
 }
 
-public class MapNode
+public struct MapNode
 {
 	public int Entity;
 	public Vector2Int Position;

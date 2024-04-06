@@ -17,7 +17,9 @@ namespace UI.Presenters
 		private readonly UiSaveHudPresenter _saveHudPresenter;
 		private readonly IWindowService _windowService;
 		private readonly EcsPool<InputToolComponent> _poolInputTool;
+		private readonly EcsPool<InputIsBrushToolComponent> _poolIsBrushToolComponent;
 		private readonly EcsFilter _filterTool;
+		private readonly EcsFilter _ecsFilter;
 		public override bool IsPopUp => false;
 
 		public UiToolHudPresenter(UiToolHudView view,
@@ -28,7 +30,9 @@ namespace UI.Presenters
 			_toolsData = toolsData;
 			_saveHudPresenter = saveHudPresenter;
 			_poolInputTool = inputWorld.GetPool<InputToolComponent>();
+			_poolIsBrushToolComponent = inputWorld.GetPool<InputIsBrushToolComponent>();
 			_filterTool = inputWorld.Filter<InputToolComponent>().End();
+			_ecsFilter = inputWorld.Filter<InputIsBrushToolComponent>().End();
 		}
 
 		public void Initialize()
@@ -48,6 +52,8 @@ namespace UI.Presenters
 		{
 			ref var toolType = ref _poolInputTool.Get(_filterTool.GetRawEntities()[0]).Value;
 			var toolData = _toolsData.GetTool(toggleToolType);
+			ref var isBrushTool = ref _poolIsBrushToolComponent.Get(_ecsFilter.GetRawEntities()[0]).Value;
+			isBrushTool = _toolsData.GetTool(toggleToolType).IsBrushTool;
 
 			if (toggleToolType == toolType)
 			{

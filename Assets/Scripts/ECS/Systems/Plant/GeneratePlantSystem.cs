@@ -1,6 +1,7 @@
 using Db.Plant;
 using DefaultNamespace.Components.Plant;
 using DefaultNamespace.Components.Weather;
+using DefaultNamespace.Db;
 using DefaultNamespace.Systems.Save;
 using DefaultNamespace.Utils;
 using ECS.Components.Map;
@@ -13,11 +14,13 @@ namespace ECS.Systems
 	{
 		private readonly PlantsData _plantsData;
 		private readonly ISaveModel _saveModel;
+		private readonly GameSetting _gameSetting;
 
-		public GeneratePlantSystem(PlantsData plantsData, ISaveModel saveModel)
+		public GeneratePlantSystem(PlantsData plantsData, ISaveModel saveModel, GameSetting gameSetting)
 		{
 			_plantsData = plantsData;
 			_saveModel = saveModel;
+			_gameSetting = gameSetting;
 		}
 
 		public void Init(IEcsSystems systems)
@@ -31,7 +34,7 @@ namespace ECS.Systems
 			var poolPlantPoolIndexComponent = world.GetPool<PoolIndexComponent>();
 			var poolPlantPositionComponent = world.GetPool<PlantPositionComponent>();
 
-			if (_saveModel.LastSave != null && WorldUtils.SAVE_ENABLE)
+			if (_saveModel.LastSave != null && _gameSetting.IsSaveEnable)
 			{
 				var plantSaveData = _saveModel.LastSave.PlantsaveData;
 				foreach (var componentData in plantSaveData)

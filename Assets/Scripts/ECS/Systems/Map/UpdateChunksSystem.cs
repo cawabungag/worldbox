@@ -41,7 +41,7 @@ namespace ECS.Systems
 			_mapService = mapService;
 			_world = world;
 
-			var maxVoxelType = Enum.GetValues(typeof(VoxelType)).Cast<byte>().Max();
+			var maxVoxelType = Enum.GetValues(typeof(VoxelType)).Cast<byte>().Max() + 1;
 			for (int i = 0; i < WorldUtils.CHUNK_SIZE * WorldUtils.CHUNK_SIZE * maxVoxelType; i++)
 			{
 				_texturesBuffer.Add(i, new List<Vector2>());
@@ -133,9 +133,16 @@ namespace ECS.Systems
 			var y = position.y;
 			var z = position.z;
 
-			var verticesBuffer = _verticesBuffer[_lastBufferIndex];
-			var trianglesBuffer = _trianglesBuffer[_lastBufferIndex];
-			var texturesBuffer = _texturesBuffer[_lastBufferIndex];
+			var hasVerticesBuffer = _verticesBuffer.TryGetValue(_lastBufferIndex, out var verticesBuffer);
+			var hasTriangleBuffer = _trianglesBuffer.TryGetValue(_lastBufferIndex, out var trianglesBuffer);
+			var hasTextureBuffer = _texturesBuffer.TryGetValue(_lastBufferIndex, out var texturesBuffer);
+
+			if (!hasVerticesBuffer || !hasTriangleBuffer || !hasTextureBuffer)
+			{
+				Debug.LogError($"_lastBufferIndex : {_lastBufferIndex}");
+				return;
+			}
+			
 			_lastBufferIndex++;
 
 			// Front
