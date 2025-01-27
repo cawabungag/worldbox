@@ -1,4 +1,4 @@
-# README: Voxel World in Unity with ECS Architecture
+# Voxel World in Unity with ECS Architecture
 
 ## Project Overview
 
